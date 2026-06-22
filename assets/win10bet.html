@@ -64,8 +64,13 @@
       min-height: 100vh;
       display: grid;
       align-content: start;
-      gap: 12px;
+      gap: 14px;
       padding: 18px;
+      background:
+        radial-gradient(circle at top left, rgba(31, 120, 255, .22), transparent 34%),
+        radial-gradient(circle at top right, rgba(255, 207, 74, .18), transparent 28%),
+        linear-gradient(180deg, rgba(7, 18, 40, .04), rgba(7, 18, 40, 0)),
+        transparent;
     }
 
     .brand {
@@ -73,6 +78,7 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
+      padding: 4px 2px 0;
     }
 
     .logo {
@@ -103,17 +109,64 @@
 
     .auth-card {
       padding: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .auth-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto auto 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(90deg, #ffcf4a, #1f78ff, #16b56f);
+    }
+
+    .auth-topline {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 14px;
+      padding-top: 4px;
+    }
+
+    .auth-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(31, 120, 255, .10);
+      color: var(--brand);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .auth-badge::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #16b56f;
+      box-shadow: 0 0 0 6px rgba(22, 181, 111, .15);
+    }
+
+    .auth-mini-note {
+      color: var(--muted);
+      font-size: 12px;
+      text-align: right;
     }
 
     .auth-visual {
-      min-height: 210px;
-      border-radius: 8px;
-      padding: 16px;
+      min-height: 270px;
+      border-radius: 18px;
+      padding: 20px;
       display: grid;
       align-content: end;
       color: #fff;
       background:
-        linear-gradient(180deg, rgba(5, 10, 20, .12), rgba(5, 10, 20, .82)),
+        linear-gradient(180deg, rgba(5, 10, 20, .04), rgba(5, 10, 20, .84)),
         url("assets/win10bet-welcome.png") center/cover;
       border: 1px solid rgba(255,255,255,.16);
       box-shadow: var(--shadow);
@@ -121,18 +174,27 @@
       position: relative;
     }
 
+    .auth-visual::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(120deg, rgba(17, 42, 87, .65), rgba(17, 42, 87, .08) 46%, rgba(22, 181, 111, .14)),
+        radial-gradient(circle at 70% 30%, rgba(255, 207, 74, .24), transparent 22%);
+    }
+
     .auth-visual::after {
       content: "";
       position: absolute;
-      right: -40px;
-      bottom: -42px;
-      width: 130px;
-      height: 130px;
+      right: -34px;
+      bottom: -34px;
+      width: 148px;
+      height: 148px;
       border-radius: 50%;
       background:
         radial-gradient(circle, rgba(255,255,255,.9) 0 15%, transparent 16%),
         repeating-conic-gradient(from 12deg, rgba(31,120,255,.34) 0 14deg, rgba(255,207,74,.32) 14deg 28deg);
-      opacity: .75;
+      opacity: .78;
     }
 
     .auth-visual > * {
@@ -141,30 +203,79 @@
     }
 
     .auth-visual h1 {
-      font-size: 28px;
-      line-height: 1.04;
+      font-size: 32px;
+      line-height: 1.02;
       color: #ffcf4a;
       text-shadow: 0 4px 18px rgba(0,0,0,.5);
     }
 
     .auth-visual p {
-      margin-top: 7px;
-      max-width: 360px;
+      margin-top: 8px;
+      max-width: 330px;
       color: rgba(255,255,255,.92);
       font-size: 13px;
       line-height: 1.45;
     }
 
+    .auth-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      margin-bottom: 10px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.18);
+      backdrop-filter: blur(8px);
+      color: #fff4ba;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .4px;
+    }
+
+    .auth-visual-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .auth-visual-tile {
+      min-height: 80px;
+      border-radius: 14px;
+      padding: 12px;
+      display: grid;
+      align-content: end;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.18)),
+        rgba(7, 18, 40, .38);
+      border: 1px solid rgba(255,255,255,.14);
+      backdrop-filter: blur(6px);
+    }
+
+    .auth-visual-tile strong {
+      font-size: 13px;
+      color: #fff;
+    }
+
+    .auth-visual-tile span {
+      margin-top: 4px;
+      font-size: 11px;
+      color: rgba(255,255,255,.78);
+      line-height: 1.35;
+    }
+
     .auth-points {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
+      gap: 10px;
     }
 
     .auth-point {
-      min-height: 58px;
-      padding: 9px;
-      border-radius: 8px;
+      min-height: 62px;
+      padding: 10px 10px 11px;
+      border-radius: 12px;
       background: rgba(255,255,255,.92);
       border: 1px solid var(--line);
       box-shadow: 0 8px 18px rgba(24,45,66,.08);
@@ -188,8 +299,8 @@
       justify-content: space-between;
       gap: 10px;
       align-items: center;
-      padding: 10px 12px;
-      border-radius: 8px;
+      padding: 12px 14px;
+      border-radius: 12px;
       background: linear-gradient(145deg, #ffffff, #eef6ff);
       border: 1px solid var(--line);
       color: var(--muted);
@@ -208,8 +319,8 @@
     }
 
     .tab {
-      height: 42px;
-      border-radius: 6px;
+      height: 44px;
+      border-radius: 10px;
       color: var(--muted);
     }
 
@@ -231,7 +342,7 @@
       width: 100%;
       min-height: 44px;
       border: 1px solid var(--line);
-      border-radius: 6px;
+      border-radius: 10px;
       padding: 10px 12px;
       color: var(--text);
       background: #fff;
@@ -244,16 +355,17 @@
 
     .primary {
       width: 100%;
-      min-height: 46px;
-      border-radius: 6px;
+      min-height: 48px;
+      border-radius: 10px;
       color: #fff;
-      background: var(--brand);
+      background: linear-gradient(135deg, #1f78ff, #16b56f);
       font-weight: 800;
+      box-shadow: 0 16px 28px rgba(31, 120, 255, .22);
     }
 
     .secondary {
       min-height: 38px;
-      border-radius: 6px;
+      border-radius: 10px;
       padding: 0 12px;
       border: 1px solid var(--line);
     }
@@ -5662,22 +5774,32 @@
       <div class="logo"><span class="mark">W</span>win10bet</div>
     </div>
     <section class="auth-visual">
-      <h1>欢迎来 win10bet</h1>
-      <p>体育赛事、机器人牌桌、老虎机和创新积分游戏，登录后进入大厅。</p>
+      <div class="auth-kicker">AI LIVE SPORTS</div>
+      <h1>今晚开盘<br>点亮好运</h1>
+      <p>世界杯、热门联赛和娱乐城同步开放。手机号即可进入，登录后直接查看今天赛事与最近三天赛程。</p>
+      <div class="auth-visual-grid">
+        <div class="auth-visual-tile"><strong>今天赛事</strong><span>优先展示当日比赛</span></div>
+        <div class="auth-visual-tile"><strong>世界杯</strong><span>三天内赛程自动更新</span></div>
+        <div class="auth-visual-tile"><strong>娱乐城</strong><span>牌桌、老虎机、小游戏</span></div>
+      </div>
     </section>
     <div class="auth-points">
-      <div class="auth-point"><strong>注册 0 分</strong><span>进入后申请积分</span></div>
-      <div class="auth-point"><strong>赛事单</strong><span>世界杯 / NBA 待结算</span></div>
-      <div class="auth-point"><strong>娱乐场</strong><span>牌桌与转轴可玩</span></div>
+      <div class="auth-point"><strong>手机号登录</strong><span>支持 017 / 60 / +60</span></div>
+      <div class="auth-point"><strong>动态赔率</strong><span>世界杯优先展示</span></div>
+      <div class="auth-point"><strong>后台联动</strong><span>下注与申请实时可见</span></div>
     </div>
     <section class="card auth-card">
+      <div class="auth-topline">
+        <div class="auth-badge">马来西亚号码已开启</div>
+        <div class="auth-mini-note">支持 WhatsApp 注册验证</div>
+      </div>
       <div class="tabs">
         <button class="tab active" id="loginTab">登录</button>
         <button class="tab" id="registerTab">注册</button>
       </div>
       <div class="field">
         <label for="authName">手机号</label>
-        <input id="authName" maxlength="11" inputmode="numeric" autocomplete="username" placeholder="输入手机号">
+        <input id="authName" maxlength="14" inputmode="tel" autocomplete="username" placeholder="输入手机号，例如 60178541111">
       </div>
       <div class="field">
         <label for="authPass">密码</label>
@@ -5697,7 +5819,7 @@
           <input id="authCode" maxlength="8" inputmode="numeric" placeholder="输入收到的验证码">
           <button class="secondary" id="sendWhatsappCode" type="button">发送验证码</button>
         </div>
-        <div class="muted" id="registerCodeHint" style="font-size:12px;">注册时可通过 WhatsApp 收码，未配置时会提示不可用。</div>
+        <div class="muted" id="registerCodeHint" style="font-size:12px;">注册时可通过 WhatsApp 收码，支持 017、60 或 +60 开头号码。未配置时也可直接注册。</div>
       </div>
       <button class="primary" id="authSubmit">登录</button>
       <p class="muted" id="authHint" style="margin-top:12px;">首次使用请切换到注册。新账号积分为 0，需要申请积分后由客服审核发放。</p>
@@ -6391,17 +6513,18 @@
 
     function normalizeState(data = {}, currentUser = localCurrentUser()) {
       data.logs = (data.logs || []).filter(log => Date.now() - new Date(log.time).getTime() <= 7 * DAY);
+      const normalizedCurrentUser = normalizePhone(currentUser) || currentUser;
       return {
         ...defaultState,
         ...data,
-        currentUser,
-        users: data.users || {},
-        requests: data.requests || [],
-        logs: data.logs || [],
-        openBets: data.openBets || [],
-        slotStats: data.slotStats || {},
+        currentUser: normalizedCurrentUser,
+        users: migrateUsers(data.users || {}),
+        requests: migrateUserEntries(data.requests || []),
+        logs: migrateUserEntries(data.logs || []),
+        openBets: migrateUserEntries(data.openBets || []),
+        slotStats: migrateLookupMap(data.slotStats || {}),
         gameTrends: data.gameTrends || {},
-        testOverrides: { ...(data.testOverrides || {}) },
+        testOverrides: migrateLookupMap(data.testOverrides || {}),
         cardSkin: data.cardSkin || "classic",
         odds: { ...defaultState.odds, ...(data.odds || {}) }
       };
@@ -6627,8 +6750,47 @@
       return /^\d{6,}$/.test(pass);
     }
 
+    function normalizePhone(phone) {
+      const cleaned = String(phone || "").replace(/\D/g, "");
+      if (/^60\d{9,10}$/.test(cleaned)) return cleaned;
+      if (/^0?1\d{8,9}$/.test(cleaned)) return `60${cleaned.replace(/^0/, "")}`;
+      return "";
+    }
+
     function isValidPhone(phone) {
-      return /^01\d{8,9}$/.test(phone);
+      return Boolean(normalizePhone(phone));
+    }
+
+    function migrateUsers(users = {}) {
+      const next = {};
+      Object.entries(users || {}).forEach(([key, entry]) => {
+        const phone = normalizePhone(entry?.phone || entry?.name || key);
+        const normalizedKey = phone || String(entry?.name || key || "").trim();
+        if (!normalizedKey) return;
+        next[normalizedKey] = {
+          ...entry,
+          name: normalizedKey,
+          phone: phone || normalizedKey
+        };
+      });
+      return next;
+    }
+
+    function migrateUserEntries(list = []) {
+      return (list || []).map(item => {
+        const normalizedUser = normalizePhone(item?.user) || String(item?.user || "").trim();
+        return normalizedUser ? { ...item, user: normalizedUser } : item;
+      });
+    }
+
+    function migrateLookupMap(map = {}) {
+      const next = {};
+      Object.entries(map || {}).forEach(([key, value]) => {
+        const normalizedKey = normalizePhone(key) || String(key || "").trim();
+        if (!normalizedKey) return;
+        next[normalizedKey] = value;
+      });
+      return next;
     }
 
     function buildCaptchaQuestion() {
@@ -6673,7 +6835,7 @@
       document.getElementById("loginTab").classList.toggle("active", mode === "login");
       document.getElementById("registerTab").classList.toggle("active", mode === "register");
       document.getElementById("authSubmit").textContent = mode === "login" ? "登录" : "注册";
-      document.getElementById("authHint").textContent = mode === "login" ? "登录必须完成人机验证。请使用手机号和至少6位数字密码登录。" : "注册请使用手机号，密码至少6位数字。短信验证码暂未接入。";
+      document.getElementById("authHint").textContent = mode === "login" ? "登录必须完成人机验证。请使用手机号和至少6位数字密码登录，支持 017、60 或 +60 输入。" : "注册请使用手机号，密码至少6位数字。可选 WhatsApp 验证，未配置时也能直接注册。";
       document.getElementById("captchaField").style.display = mode === "login" ? "grid" : "none";
       document.getElementById("registerCodeField").style.display = mode === "register" ? "grid" : "none";
       whatsappCodeSent = false;
@@ -6682,8 +6844,9 @@
     }
 
     async function sendWhatsappCode() {
-      const phone = document.getElementById("authName").value.trim();
+      const phone = normalizePhone(document.getElementById("authName").value.trim());
       if (!isValidPhone(phone)) return showToast("请输入正确手机号");
+      document.getElementById("authName").value = phone;
       try {
         await apiFetch("/api/auth/request-whatsapp-code", {
           method: "POST",
@@ -6698,13 +6861,14 @@
     }
 
     async function handleAuth() {
-      const name = document.getElementById("authName").value.trim();
+      const name = normalizePhone(document.getElementById("authName").value.trim());
       const pass = document.getElementById("authPass").value.trim();
       const captchaAnswer = document.getElementById("authCaptcha").value.trim();
       const captchaQuestion = buildCaptchaQuestion();
       const whatsappCode = document.getElementById("authCode").value.trim();
       if (!name || !pass) return showToast("请输入手机号和密码");
       if (!isValidPhone(name)) return showToast("请输入正确手机号");
+      document.getElementById("authName").value = name;
       if (!isValidPassword(pass)) return showToast("密码至少6位数字");
       if (authMode === "login") {
         if (!captchaAnswer) return showToast("请完成人机验证");
@@ -6714,8 +6878,9 @@
         }
       }
       if (API_ENABLED) {
+        const endpoint = authMode === "register" ? (whatsappCode ? "/api/auth/register-whatsapp" : "/api/register") : "/api/login";
         try {
-          const data = await apiFetch(authMode === "register" ? "/api/auth/register-whatsapp" : "/api/login", {
+          const data = await apiFetch(endpoint, {
             method: "POST",
             body: JSON.stringify({ name, pass, code: whatsappCode, captchaQuestion, captchaAnswer })
           });
@@ -6732,10 +6897,8 @@
         }
       }
       if (authMode === "register") {
-        if (!whatsappCodeSent) return showToast("请先发送 WhatsApp 验证码");
-        if (!whatsappCode) return showToast("请输入 WhatsApp 验证码");
         if (state.users[name]) return showToast("这个手机号已经注册");
-        state.users[name] = { name, phone: name, pass, balance: 0, createdAt: now(), verifiedVia: "local-fallback" };
+        state.users[name] = { name, phone: name, pass, balance: 0, createdAt: now(), verifiedVia: whatsappCode ? "local-whatsapp" : "local-fallback" };
         state.currentUser = name;
         localStorage.setItem(SESSION_KEY, name);
         addLog(name, "注册账号", 0, 0, "注册");

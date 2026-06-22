@@ -112,16 +112,19 @@ function now() {
 
 function cleanState(input = {}) {
   const data = { ...defaultState, ...input };
-  data.users = data.users || {};
-  data.requests = data.requests || [];
+  data.users = normalizeUserMap(data.users || {});
+  data.requests = remapUserEntries(data.requests || []);
   data.logs = (data.logs || []).filter(log => {
     const time = new Date(log.time || 0).getTime();
     return time && Date.now() - time <= 7 * DAY;
+  }).map(log => {
+    const user = normalizeUserKey(log.user);
+    return user ? { ...log, user } : log;
   });
-  data.openBets = data.openBets || [];
-  data.slotStats = data.slotStats || {};
+  data.openBets = remapUserEntries(data.openBets || []);
+  data.slotStats = remapUserLookupMap(data.slotStats || {});
   data.gameTrends = data.gameTrends || {};
-  data.testOverrides = data.testOverrides || {};
+  data.testOverrides = remapUserLookupMap(data.testOverrides || {});
   data.odds = { ...defaultState.odds, ...(data.odds || {}) };
   data.currentUser = "";
   return data;
@@ -192,11 +195,12 @@ function stateResponse(res, state) {
 }
 
 function requireUser(state, name, res) {
-  if (!name || !state.users[name]) {
+  const key = normalizeUserKey(name);
+  if (!key || !state.users[key]) {
     json(res, 404, { ok: false, message: text.userMissing });
     return null;
   }
-  return state.users[name];
+  return state.users[key];
 }
 
 function readJson(req) {
@@ -220,8 +224,50 @@ function validPassword(pass) {
   return /^\d{6,}$/.test(pass);
 }
 
+function normalizePhone(phone) {
+  const cleaned = String(phone || "").replace(/\D/g, "");
+  if (/^60\d{9,10}$/.test(cleaned)) return cleaned;
+  if (/^0?1\d{8,9}$/.test(cleaned)) return `60${cleaned.replace(/^0/, "")}`;
+  return "";
+}
+
 function validPhone(phone) {
-  return /^01\d{8,9}$/.test(phone);
+  return Boolean(normalizePhone(phone));
+}
+
+function normalizeUserKey(value) {
+  return normalizePhone(value) || String(value || "").trim();
+}
+
+function normalizeUserMap(users = {}) {
+  const next = {};
+  for (const [key, entry] of Object.entries(users || {})) {
+    const normalizedKey = normalizeUserKey(entry?.phone || entry?.name || key);
+    if (!normalizedKey) continue;
+    next[normalizedKey] = {
+      ...entry,
+      name: normalizedKey,
+      phone: normalizePhone(entry?.phone || entry?.name || key) || normalizedKey
+    };
+  }
+  return next;
+}
+
+function remapUserEntries(list = []) {
+  return list.map(item => {
+    const user = normalizeUserKey(item?.user);
+    return user ? { ...item, user } : item;
+  });
+}
+
+function remapUserLookupMap(map = {}) {
+  const next = {};
+  for (const [key, value] of Object.entries(map || {})) {
+    const normalizedKey = normalizeUserKey(key);
+    if (!normalizedKey) continue;
+    next[normalizedKey] = value;
+  }
+  return next;
 }
 
 function validCaptcha(question, answer) {
@@ -237,10 +283,8 @@ function hasWhatsappVerify() {
 }
 
 function formatPhoneE164(phone) {
-  const cleaned = String(phone || "").replace(/\D/g, "");
-  if (/^60\d{9,10}$/.test(cleaned)) return `+${cleaned}`;
-  if (/^01\d{8,9}$/.test(cleaned)) return `+60${cleaned.slice(1)}`;
-  return "";
+  const normalized = normalizePhone(phone);
+  return normalized ? `+${normalized}` : "";
 }
 
 async function twilioVerifyRequest(pathname, payload) {
@@ -864,9 +908,8 @@ const server = http.createServer(async (req, res) => {
     }
     if (req.method === "POST" && url.pathname === "/api/auth/request-whatsapp-code") {
       const body = await readJson(req);
-      const phone = String(body.phone || body.name || "").trim();
-      if (!phone) return json(res, 400, { ok: false, message: text.accountRequired });
-      if (!validPhone(phone)) return json(res, 400, { ok: false, message: text.badPhone });
+      const phone = normalizePhone(body.phone || body.name || "");
+      if (!phone) return json(res, 400, { ok: false, message: text.badPhone });
       try {
         await requestWhatsappCode(phone);
         return json(res, 200, { ok: true, message: "WhatsApp code sent" });
@@ -877,11 +920,10 @@ const server = http.createServer(async (req, res) => {
     }
     if (req.method === "POST" && url.pathname === "/api/auth/register-whatsapp") {
       const body = await readJson(req);
-      const name = String(body.name || body.phone || "").trim();
+      const name = normalizePhone(body.name || body.phone || "");
       const pass = String(body.pass || "").trim();
       const code = String(body.code || "").trim();
-      if (!name) return json(res, 400, { ok: false, message: text.accountRequired });
-      if (!validPhone(name)) return json(res, 400, { ok: false, message: text.badPhone });
+      if (!name) return json(res, 400, { ok: false, message: text.badPhone });
       if (!validPassword(pass)) return json(res, 400, { ok: false, message: text.badPassword });
       if (!code) return json(res, 400, { ok: false, message: text.codeRequired });
       const state = readState();
@@ -899,10 +941,9 @@ const server = http.createServer(async (req, res) => {
     }
     if (req.method === "POST" && url.pathname === "/api/register") {
       const body = await readJson(req);
-      const name = String(body.name || "").trim();
+      const name = normalizePhone(body.name || "");
       const pass = String(body.pass || "").trim();
-      if (!name) return json(res, 400, { ok: false, message: text.accountRequired });
-      if (!validPhone(name)) return json(res, 400, { ok: false, message: text.badPhone });
+      if (!name) return json(res, 400, { ok: false, message: text.badPhone });
       if (!validPassword(pass)) return json(res, 400, { ok: false, message: text.badPassword });
       const state = readState();
       if (state.users[name]) return json(res, 409, { ok: false, message: text.duplicate });
@@ -912,10 +953,13 @@ const server = http.createServer(async (req, res) => {
     }
     if (req.method === "POST" && url.pathname === "/api/login") {
       const body = await readJson(req);
-      const name = String(body.name || "").trim();
+      const name = normalizePhone(body.name || "");
       const pass = String(body.pass || "").trim();
       const captchaQuestion = String(body.captchaQuestion || "").trim();
       const captchaAnswer = String(body.captchaAnswer || "").trim();
+      if (!name) {
+        return json(res, 400, { ok: false, message: text.badPhone });
+      }
       if (!captchaQuestion || !captchaAnswer) {
         return json(res, 400, { ok: false, message: text.captchaRequired });
       }
