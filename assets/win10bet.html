@@ -1677,7 +1677,8 @@
     .casino-page .table-preview.slot-scene,
     .casino-page .table-preview.arcade-scene,
     .casino-page .table-preview.versus-scene,
-    .casino-page .table-preview.chips-scene {
+    .casino-page .table-preview.chips-scene,
+    .casino-page .table-preview.poker-scene {
       min-height: 44px;
       height: 44px;
       padding: 5px;
@@ -2210,7 +2211,8 @@
     .table-preview.slot-scene,
     .table-preview.arcade-scene,
     .table-preview.versus-scene,
-    .table-preview.chips-scene {
+    .table-preview.chips-scene,
+    .table-preview.poker-scene {
       height: 58px;
       padding: 7px;
       border-radius: 8px;
@@ -2223,7 +2225,9 @@
 
     .table-preview.slot-scene::before,
     .table-preview.arcade-scene::before,
-    .table-preview.versus-scene::before {
+    .table-preview.versus-scene::before,
+    .table-preview.chips-scene::before,
+    .table-preview.poker-scene::before {
       content: "";
       position: absolute;
       inset: 0;
@@ -2253,6 +2257,22 @@
       background:
         radial-gradient(circle at 50% 50%, rgba(255,207,74,.28), transparent 24%),
         linear-gradient(145deg, #172033, #273c66);
+    }
+
+    .table-preview.chips-scene {
+      justify-content: space-between;
+      gap: 7px;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255,207,74,.22), transparent 24%),
+        linear-gradient(145deg, #10382f, #0f2133);
+    }
+
+    .table-preview.poker-scene {
+      justify-content: space-between;
+      gap: 5px;
+      background:
+        radial-gradient(circle at 78% 22%, rgba(255,95,87,.18), transparent 28%),
+        linear-gradient(145deg, #2a1733, #172033);
     }
 
     .slot-tile,
@@ -2291,6 +2311,75 @@
 
     .versus-token:last-child {
       background: linear-gradient(135deg, #19c37d, #1f78ff);
+    }
+
+    .chip-token {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #fff8dc;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .3px;
+      background:
+        radial-gradient(circle at 34% 24%, rgba(255,255,255,.82), transparent 20%),
+        radial-gradient(circle, rgba(255,255,255,.18), transparent 40%),
+        conic-gradient(from 8deg, rgba(255,255,255,.92) 0 9deg, transparent 9deg 22deg, rgba(255,255,255,.74) 22deg 31deg, transparent 31deg 44deg),
+        linear-gradient(135deg, #d12f4b, #6a0f1f);
+      border: 2px solid rgba(255,255,255,.84);
+      box-shadow: inset 0 -4px 8px rgba(0,0,0,.18), 0 8px 16px rgba(15,23,42,.26);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .chip-token::after {
+      content: "";
+      position: absolute;
+      inset: 6px;
+      border-radius: inherit;
+      border: 1px solid rgba(255,255,255,.72);
+    }
+
+    .chip-token.gold {
+      color: #10213f;
+      background:
+        radial-gradient(circle at 34% 24%, rgba(255,255,255,.86), transparent 20%),
+        radial-gradient(circle, rgba(255,255,255,.22), transparent 40%),
+        conic-gradient(from 8deg, rgba(255,255,255,.92) 0 9deg, transparent 9deg 22deg, rgba(255,255,255,.74) 22deg 31deg, transparent 31deg 44deg),
+        linear-gradient(135deg, #ffcf4a, #c47700);
+    }
+
+    .chip-token.blue {
+      background:
+        radial-gradient(circle at 34% 24%, rgba(255,255,255,.86), transparent 20%),
+        radial-gradient(circle, rgba(255,255,255,.22), transparent 40%),
+        conic-gradient(from 8deg, rgba(255,255,255,.92) 0 9deg, transparent 9deg 22deg, rgba(255,255,255,.74) 22deg 31deg, transparent 31deg 44deg),
+        linear-gradient(135deg, #1f78ff, #0b3d91);
+    }
+
+    .chips-divider {
+      flex: 1;
+      height: 3px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(255,255,255,.16), rgba(255,207,74,.72), rgba(255,255,255,.16));
+    }
+
+    .poker-seat {
+      min-width: 36px;
+      height: 36px;
+      padding: 0 8px;
+      border-radius: 999px;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      background: linear-gradient(135deg, rgba(255,95,87,.94), rgba(127,29,29,.92));
+      border: 1px solid rgba(255,255,255,.24);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .4px;
+      box-shadow: inset 0 -3px 6px rgba(0,0,0,.24);
     }
 
     .lane-line {
@@ -3947,7 +4036,8 @@
       place-items: center;
       color: #f8fafc;
       background:
-        radial-gradient(circle at 35% 28%, rgba(255,255,255,.78), transparent 22%),
+        radial-gradient(circle at 35% 28%, rgba(255,255,255,.84), transparent 22%),
+        radial-gradient(circle, rgba(255,255,255,.18), transparent 40%),
         conic-gradient(from 12deg, rgba(255,255,255,.92) 0 9deg, transparent 9deg 24deg, rgba(255,255,255,.82) 24deg 34deg, transparent 34deg 48deg),
         linear-gradient(135deg, #d12f4b, #6a0f1f);
       border: 2px solid rgba(255,255,255,.84);
@@ -3986,15 +4076,16 @@
       padding: 10px;
       border-radius: 8px;
       background:
-        repeating-linear-gradient(135deg, rgba(31,120,255,.045) 0 2px, transparent 2px 12px),
-        radial-gradient(circle at 12% 18%, rgba(255,207,74,.18), transparent 24%),
-        linear-gradient(145deg, rgba(255,255,255,.94), rgba(238,246,255,.86));
+        linear-gradient(180deg, rgba(10,20,34,.05), transparent 36%),
+        repeating-linear-gradient(135deg, rgba(31,120,255,.05) 0 2px, transparent 2px 12px),
+        radial-gradient(circle at 12% 18%, rgba(255,207,74,.22), transparent 24%),
+        linear-gradient(145deg, rgba(255,255,255,.96), rgba(238,246,255,.90));
       border: 1px solid var(--line);
-      box-shadow: 0 10px 22px rgba(24,45,66,.1);
+      box-shadow: 0 12px 28px rgba(24,45,66,.12);
     }
 
     .chips::before {
-      content: "CHIPS";
+      content: "VIP CHIPS";
       grid-column: 1 / -1;
       color: var(--muted);
       font-size: 10px;
@@ -4009,14 +4100,14 @@
       place-items: center;
       color: #fff;
       background:
-        radial-gradient(circle at 35% 28%, rgba(255,255,255,.52), transparent 20%),
-        radial-gradient(circle, rgba(255,255,255,.22), transparent 36%),
-        conic-gradient(from 8deg, rgba(255,255,255,.86) 0 8deg, transparent 8deg 22deg, rgba(255,255,255,.76) 22deg 30deg, transparent 30deg 45deg),
+        radial-gradient(circle at 35% 28%, rgba(255,255,255,.68), transparent 20%),
+        radial-gradient(circle, rgba(255,255,255,.26), transparent 36%),
+        conic-gradient(from 8deg, rgba(255,255,255,.90) 0 8deg, transparent 8deg 22deg, rgba(255,255,255,.78) 22deg 30deg, transparent 30deg 45deg),
         linear-gradient(135deg, #1f78ff, #0b3d91);
-      border: 3px dashed rgba(255,255,255,.72);
+      border: 3px solid rgba(255,255,255,.76);
       font-weight: 900;
       font-size: 12px;
-      box-shadow: inset 0 -5px 9px rgba(0,0,0,.18), 0 7px 14px rgba(24,45,66,.18);
+      box-shadow: inset 0 -5px 9px rgba(0,0,0,.18), 0 10px 20px rgba(24,45,66,.2);
       transition: transform .14s ease, box-shadow .14s ease;
       position: relative;
       overflow: hidden;
@@ -4091,11 +4182,11 @@
 
     .chip.active {
       background:
-        radial-gradient(circle at 35% 28%, rgba(255,255,255,.64), transparent 20%),
-        radial-gradient(circle, rgba(255,255,255,.28), transparent 36%),
+        radial-gradient(circle at 35% 28%, rgba(255,255,255,.74), transparent 20%),
+        radial-gradient(circle, rgba(255,255,255,.32), transparent 36%),
         linear-gradient(135deg, #ffcf4a, #c47700);
       color: #10213f;
-      box-shadow: 0 0 0 4px rgba(255,207,74,.22), inset 0 -5px 9px rgba(91,55,0,.16), 0 10px 18px rgba(24,45,66,.22);
+      box-shadow: 0 0 0 4px rgba(255,207,74,.22), inset 0 -5px 9px rgba(91,55,0,.16), 0 12px 22px rgba(24,45,66,.24);
       transform: translateY(-2px) scale(1.03);
     }
 
@@ -5234,7 +5325,7 @@
     }
 
     .casino-hero::after {
-      content: "VIP TABLE A K Q LIVE";
+      content: "VIP LOUNGE BACCARAT BLACKJACK POKER";
       position: absolute;
       right: -18px;
       top: 20px;
@@ -6011,8 +6102,8 @@
         <div class="ad-strip">
           <button class="ad" data-page="sports" style="background-image:url('assets/football-ai-v2.svg')"><strong>世界杯赛程</strong><span>赛前积分投注</span></button>
           <button class="ad" data-page="sports" style="background-image:url('assets/nba-ai-v2.svg')"><strong>NBA Finals</strong><span>胜负 / 让分 / 大小分</span></button>
-          <button class="ad" data-game="blackjack" style="background-image:url('assets/blackjack-ai-v2.svg')"><strong>21点机器人荷官</strong><span>要牌或停牌</span></button>
-          <button class="ad" data-game="baccarat" style="background-image:url('assets/table-ai-v2.svg')"><strong>百家乐牌路桌</strong><span>闲 / 平 / 庄 筹码下注</span></button>
+          <button class="ad" data-game="blackjack" style="background-image:url('assets/blackjack-ai-v2.svg')"><strong>贵宾 21点桌</strong><span>AI 荷官 · 要牌 / 停牌</span></button>
+          <button class="ad" data-game="baccarat" style="background-image:url('assets/table-ai-v2.svg')"><strong>贵宾百家乐厅</strong><span>闲 / 和 / 庄 多筹码连投</span></button>
           <button class="ad" data-game="gold-panther" style="background-image:url('assets/panther-slot-cover.svg')"><strong>金豹宝藏新机台</strong><span>4x4 金豹盘自动转</span></button>
           <button class="ad" data-page="account" style="background-image:url('assets/chips-ai-cover.svg')"><strong>积分中心</strong><span>申请积分，客服审核发放</span></button>
           <div class="ad-dots"><span></span><span></span><span></span><span></span><span></span><span></span></div>
@@ -6032,8 +6123,8 @@
           </button>
           <button class="pulse-side" data-game="baccarat">
             <span>Casino Table</span>
-            <strong>百家乐筹码台</strong>
-            <div class="pulse-odds"><b>闲</b><b>平</b><b>庄</b></div>
+            <strong>贵宾百家乐厅</strong>
+            <div class="pulse-odds"><b>闲</b><b>和</b><b>庄</b></div>
           </button>
         </div>
         <div class="news-board">
@@ -6076,14 +6167,14 @@
       </section>
 
       <section id="pageCasino" class="page">
-        <div class="section-head"><h2>娱乐场</h2><span class="muted">牌桌 / 老虎机 / 街机 / 创新</span></div>
+        <div class="section-head"><h2>娱乐场</h2><span class="muted">贵宾牌桌 / 老虎机 / 街机 / 创新</span></div>
       <div class="casino-hero">
-        <h3>真人感积分娱乐城</h3>
-        <p>先上经典牌桌和高速桌台，再看热门机台与互动游戏。这里只做积分体验，界面和节奏更像正式娱乐城大厅。</p>
+        <h3>贵宾积分娱乐城</h3>
+        <p>先进入贵宾牌桌和竞速桌，再看扑克厅、热门机台与互动游戏。这里只做积分体验，但大厅节奏和视觉更接近正式娱乐城。</p>
         <div class="casino-hero-strip">
-          <div class="casino-hero-chip"><span>经典牌桌</span><strong>AI LIVE</strong><b>百家乐 / 21点 / 牛牛</b></div>
-          <div class="casino-hero-chip"><span>高速桌台</span><strong>FAST ROOM</strong><b>极速百家乐 / 超级六</b></div>
-          <div class="casino-hero-chip"><span>机台专区</span><strong>JACKPOT</strong><b>雷神 / 金豹 / 霓虹门</b></div>
+          <div class="casino-hero-chip"><span>贵宾牌桌</span><strong>VIP LIVE</strong><b>百家乐 / 21点 / 龙虎</b></div>
+          <div class="casino-hero-chip"><span>竞速桌台</span><strong>FAST ROOM</strong><b>极速百家乐 / 超级六 / 红黑</b></div>
+          <div class="casino-hero-chip"><span>扑克专厅</span><strong>POKER CLUB</strong><b>德州 / 梭哈 / 炸金花</b></div>
         </div>
       </div>
         <div class="pill-row" id="casinoFilters"></div>
@@ -6321,7 +6412,7 @@
       </div>
       <div class="room-history">
         <div class="room-history-summary" id="roomHistorySummary"></div>
-        <div class="room-history-head"><span>最近开奖记录</span><span id="roomHistoryMeta">当前游戏</span></div>
+        <div class="room-history-head"><span>最近房间记录</span><span id="roomHistoryMeta">当前游戏</span></div>
         <div class="room-history-list" id="roomHistoryList">
           <div class="room-history-row"><span class="muted">暂无</span><strong>等待开局</strong><span class="muted">-</span></div>
         </div>
@@ -6419,17 +6510,17 @@
     const resolveApiUrl = (path) => /^https?:\/\//i.test(path) ? path : `${API_BASE}${path}`;
 
     const games = [
-      { id: "blackjack", name: "21点", cat: "牌桌", desc: "要牌 / 停牌，黑金牌桌", icon: "21", playable: true, theme: "blue" },
-      { id: "baccarat", name: "百家乐", cat: "牌桌", desc: "可押闲或庄，红蓝牌路", icon: "◇", playable: true, theme: "red" },
-      { id: "niuniu", name: "牛牛", cat: "牌桌", desc: "机器人荷官发牌，金边纸牌皮肤", icon: "♣", playable: true, theme: "green" },
-      { id: "dragon", name: "龙虎", cat: "牌桌", desc: "押龙或虎，一张牌定胜负", icon: "龙", playable: true, theme: "gold" },
-      { id: "zhajinhua", name: "炸金花", cat: "牌桌", desc: "三张牌比牌型，豹子同花顺高倍", icon: "金花", playable: true, theme: "red" },
-      { id: "texas", name: "德州", cat: "牌桌", desc: "2 张手牌 + 5 张公共牌，机器人对战", icon: "T", playable: true, theme: "blue" },
-      { id: "sangong", name: "三公", cat: "牌桌", desc: "三张牌比公牌和点数", icon: "3", playable: true, theme: "green" },
-      { id: "showhand", name: "梭哈", cat: "牌桌", desc: "五张牌比牌型，机器人对战", icon: "S", playable: true, theme: "purple" },
-      { id: "paijiu", name: "牌九", cat: "牌桌", desc: "四张牌分前后墩，比点数和牌势", icon: "九", playable: true, theme: "gold" },
-      { id: "teenpatti", name: "印度三张", cat: "牌桌", desc: "三张牌比牌型，Teen Patti 风格", icon: "A3", playable: true, theme: "purple" },
-      { id: "ander", name: "安达巴哈", cat: "牌桌", desc: "押安达或巴哈，哪边先配中主牌点数", icon: "AB", playable: true, theme: "red" },
+      { id: "blackjack", name: "贵宾21点", cat: "牌桌", desc: "黑金贵宾桌，要牌 / 停牌，AI 荷官即开", icon: "21", playable: true, theme: "blue", tag: "VIP" },
+      { id: "baccarat", name: "贵宾百家乐", cat: "牌桌", desc: "红蓝牌路厅，可押闲庄和，多筹码连续下注", icon: "百", playable: true, theme: "red", tag: "HOT" },
+      { id: "niuniu", name: "包桌牛牛", cat: "牌桌", desc: "快速开牌，比牛牛点型，节奏更像包桌房", icon: "牛", playable: true, theme: "green" },
+      { id: "dragon", name: "龙虎贵宾台", cat: "牌桌", desc: "龙 / 虎 / 和 三路，单牌对冲快节奏", icon: "龙", playable: true, theme: "gold", tag: "FAST" },
+      { id: "zhajinhua", name: "炸金花俱乐部", cat: "牌桌", desc: "三张牌比大，豹子与同花顺高倍返还", icon: "金花", playable: true, theme: "red" },
+      { id: "texas", name: "德州扑克厅", cat: "牌桌", desc: "两张手牌配公共牌，打造更像扑克室体验", icon: "T", playable: true, theme: "blue", tag: "POKER" },
+      { id: "sangong", name: "三公快桌", cat: "牌桌", desc: "三张牌即开即比，适合连续积分局", icon: "3", playable: true, theme: "green" },
+      { id: "showhand", name: "梭哈俱乐部", cat: "牌桌", desc: "五张成型牌桌，偏向高牌型对决体验", icon: "S", playable: true, theme: "purple", tag: "POKER" },
+      { id: "paijiu", name: "牌九尊享厅", cat: "牌桌", desc: "前后墩组合比点，保留传统牌九桌风格", icon: "九", playable: true, theme: "gold" },
+      { id: "teenpatti", name: "三张扑克室", cat: "牌桌", desc: "三张高牌桌风格，偏向快速比牌体验", icon: "A3", playable: true, theme: "purple" },
+      { id: "ander", name: "安达巴哈厅", cat: "牌桌", desc: "安达 / 巴哈 / 首轮高倍，连续翻牌节奏", icon: "AB", playable: true, theme: "red" },
       { id: "thor", name: "雷神", cat: "老虎机", desc: "5x5 掉落，5 个电触发免费游戏", icon: "⚡", playable: true, theme: "blue" },
       { id: "fortune", name: "财神到", cat: "老虎机", desc: "4x4 金币盘，财神符号触发高倍", icon: "财", playable: true, theme: "gold" },
       { id: "aztec", name: "阿兹特克", cat: "老虎机", desc: "4x4 神庙宝石盘，图腾高倍", icon: "◇", playable: true, theme: "green" },
@@ -6459,8 +6550,8 @@
       { id: "moto", name: "摩托冲刺", cat: "街机", desc: "三辆摩托冲刺，黑车赔率更高", icon: "M", playable: true, theme: "purple" },
       { id: "keeper", name: "守门员挑战", cat: "体育娱乐", desc: "压左扑 / 点球 / 右扑，门将反应赛", icon: "GK", playable: true, theme: "green" },
       { id: "space-race", name: "太空竞速", cat: "街机", desc: "压红舰 / 星门 / 蓝舰，星际赛道", icon: "舰", playable: true, theme: "purple", tag: "新" },
-      { id: "speed-baccarat", name: "极速百家乐", cat: "牌桌", desc: "快节奏三路下注，闲平庄连续加码", icon: "速百", playable: true, theme: "red", tag: "新" },
-      { id: "super-six", name: "超级六", cat: "牌桌", desc: "庄闲平基础盘，加超级六高倍结算", icon: "6", playable: true, theme: "gold" },
+      { id: "speed-baccarat", name: "竞速百家乐", cat: "牌桌", desc: "快靴百家乐，闲 / 和 / 庄连投更顺手", icon: "速百", playable: true, theme: "red", tag: "FAST" },
+      { id: "super-six", name: "超级六贵宾桌", cat: "牌桌", desc: "庄闲基础盘外加入超级六高倍区域", icon: "6", playable: true, theme: "gold", tag: "VIP" },
       { id: "redblack", name: "红黑对决", cat: "街机", desc: "红、和、黑三路开彩，筹码桌快速结算", icon: "RB", playable: true, theme: "red" },
       { id: "goal-rush", name: "足球冲线", cat: "体育娱乐", desc: "压左路、绝杀、右路，机器人球员冲刺", icon: "GO", playable: true, theme: "green", tag: "新" },
       { id: "cyber-arena", name: "赛博竞技", cat: "电竞娱乐", desc: "蓝队、加时、红队三路，机器人对战动画", icon: "VS", playable: true, theme: "purple", tag: "热" }
@@ -7301,7 +7392,7 @@
       if (!game) return [];
       const rows = {
         blackjack: [["最低下注", "1 分"], ["胜出返还", "2:1"], ["黑杰克", "按胜出结算"]],
-        baccarat: [["闲 / 庄", "2:1返还"], ["平局", "8:1"], ["筹码", "1 - 100"]],
+        baccarat: [["闲 / 庄", "2:1返还"], ["和局", "8:1"], ["筹码", "1 - 100"]],
         dragon: [["龙 / 虎", "1:1"], ["和局", "8:1"], ["单牌", "比点数"]],
         ander: [["安达 / 巴哈", "1:1"], ["主牌", "5:1"], ["发牌", "逐张开牌"]],
         dice: [["小 / 大", "1:1"], ["豹子", "8:1"], ["最低下注", "1 分"]],
@@ -7480,7 +7571,7 @@
         <button class="casino-stat ${casinoSearch === item.cat ? "active" : ""}" data-casino-focus="${item.cat}">
           <span>${item.cat}</span>
           <strong>${item.count}/${item.total}</strong>
-          <b>${casinoSearch === item.cat ? "当前分区" : item.cat === "牌桌" ? "经典与高速桌台" : item.cat === "老虎机" ? "自动机台专区" : "打开分区"}</b>
+          <b>${casinoSearch === item.cat ? "当前分区" : item.cat === "牌桌" ? "贵宾桌 / 竞速桌 / 扑克桌" : item.cat === "老虎机" ? "自动机台专区" : "打开分区"}</b>
         </button>
       `).join("") + `
         <button class="casino-stat ${!casinoSearch ? "active" : ""}" data-casino-focus="">
@@ -7495,7 +7586,7 @@
       const box = document.getElementById("casinoLanes");
       if (!box) return;
       const lanes = [
-        { cat: "牌桌", icon: "A", game: "baccarat", note: "经典牌桌 · 百家乐 / 21点 / 牛牛" },
+        { cat: "牌桌", icon: "A", game: "baccarat", note: "贵宾主厅 · 百家乐 / 21点 / 龙虎" },
         { cat: "老虎机", icon: "⚡", game: "thor", note: "热门机台 · 雷神 / 金豹 / 霓虹门" },
         { cat: "街机", icon: "x", game: "runner", note: "互动专区 · 飞行 / 弹珠 / 探雷" },
         { cat: "体育娱乐", icon: "球", game: "penalty", note: "球类专区 · 点球 / 投篮 / 赛马" },
@@ -7522,7 +7613,7 @@
       const action = playable.filter(game => !["牌桌", "老虎机"].includes(game.cat)).length;
       const latest = playable.slice(-5).map(game => game.name).join(" / ");
       box.innerHTML = `
-        <button class="casino-op" data-casino-focus="牌桌"><span>牌桌在线</span><strong>${cards} 桌</strong><b>筹码 1 起 · 经典桌 / 高速桌</b></button>
+        <button class="casino-op" data-casino-focus="牌桌"><span>牌桌在线</span><strong>${cards} 桌</strong><b>筹码 1 起 · 贵宾桌 / 竞速桌 / 扑克桌</b></button>
         <button class="casino-op" data-casino-focus="老虎机"><span>转轴机台</span><strong>${slots} 台</strong><b>雷神 5x5 · 自动转 · 免费局</b></button>
         <button class="casino-op" data-casino-focus=""><span>新上玩法</span><strong>${action} 个</strong><b>${latest || "等待上架"}</b></button>
       `;
@@ -7532,34 +7623,35 @@
       const box = document.getElementById("casinoFloor");
       if (!box) return;
       const playable = list.filter(game => game.playable);
-      const classicCount = playable.filter(game => ["baccarat", "blackjack", "niuniu", "dragon", "texas", "paijiu", "zhajinhua", "sangong", "showhand", "teenpatti"].includes(game.id)).length;
+      const vipCount = playable.filter(game => ["baccarat", "blackjack", "dragon", "niuniu", "paijiu", "ander"].includes(game.id)).length;
       const speedCount = playable.filter(game => ["speed-baccarat", "super-six", "redblack", "sicbo", "roulette"].includes(game.id)).length;
+      const pokerCount = playable.filter(game => ["texas", "showhand", "zhajinhua", "teenpatti", "sangong"].includes(game.id)).length;
       const slotsCount = playable.filter(game => game.cat === "老虎机").length;
       const actionCount = playable.filter(game => ["街机", "体育娱乐", "电竞娱乐", "创新"].includes(game.cat)).length;
       box.innerHTML = `
         <button class="casino-floor-card" data-casino-focus="牌桌" data-mark="LIVE">
-          <span>经典桌台</span>
-          <strong>${classicCount} 桌在线</strong>
-          <b>百家乐 / 21点 / 牛牛 / 龙虎</b>
-          <small>适合直接进桌，走传统筹码节奏。</small>
+          <span>贵宾主厅</span>
+          <strong>${vipCount} 桌在线</strong>
+          <b>百家乐 / 21点 / 龙虎 / 牛牛</b>
+          <small>主打真实桌感和连续下筹码的节奏。</small>
         </button>
         <button class="casino-floor-card" data-casino-focus="牌桌" data-mark="FAST">
-          <span>高速桌台</span>
+          <span>竞速桌台</span>
           <strong>${speedCount} 桌热门</strong>
-          <b>极速百家乐 / 超级六 / 红黑</b>
-          <small>更快开局，更适合连续积分体验。</small>
+          <b>竞速百家乐 / 超级六 / 红黑</b>
+          <small>快开快结算，更适合连续积分体验。</small>
         </button>
-        <button class="casino-floor-card" data-casino-focus="老虎机" data-mark="777">
-          <span>机台专区</span>
-          <strong>${slotsCount} 台可玩</strong>
-          <b>雷神 / 金豹 / 财神到</b>
-          <small>自动转、免费局、倍数回合都已开启。</small>
+        <button class="casino-floor-card" data-casino-focus="牌桌" data-mark="POKER">
+          <span>扑克专厅</span>
+          <strong>${pokerCount} 桌开放</strong>
+          <b>德州 / 梭哈 / 炸金花</b>
+          <small>把牌型对决集中到一条更统一的扑克线。</small>
         </button>
         <button class="casino-floor-card" data-casino-focus="" data-mark="PLAY">
-          <span>互动专区</span>
-          <strong>${actionCount} 个玩法</strong>
-          <b>飞行 / 弹珠 / 探雷 / 体育娱乐</b>
-          <small>保留积分模式，节奏更像真实小游戏大厅。</small>
+          <span>其他专区</span>
+          <strong>${slotsCount + actionCount} 个玩法</strong>
+          <b>机台 / 飞行 / 弹珠 / 体育娱乐</b>
+          <small>牌桌外的玩法保留，但主视觉重心放回贵宾厅。</small>
         </button>
       `;
     }
@@ -7567,23 +7659,23 @@
     function renderCasinoFeatured() {
       const target = document.getElementById("casinoFeatured");
       if (!target) return;
-      const featuredIds = ["baccarat", "blackjack", "thor", "runner", "dragon", "darts", "space-race", "penalty", "duel", "gold-panther"];
+      const featuredIds = ["baccarat", "blackjack", "speed-baccarat", "dragon", "texas", "showhand", "zhajinhua", "thor", "runner", "gold-panther"];
       const list = featuredIds.map(id => games.find(game => game.id === id)).filter(Boolean);
       renderGames("casinoFeatured", list);
     }
 
     function gameThemeStyle(game) {
       const cover = {
-        blackjack: "assets/table-ai-v2.svg",
+        blackjack: "assets/blackjack-ai-v2.svg",
         baccarat: "assets/table-ai-v2.svg",
-        niuniu: "assets/table-ai-v2.svg",
-        zhajinhua: "assets/table-ai-v2.svg",
-        texas: "assets/table-ai-v2.svg",
+        niuniu: "assets/cards-ai-cover.svg",
+        zhajinhua: "assets/cards-ai-cover.svg",
+        texas: "assets/cards-ai-cover.svg",
         paijiu: "assets/table-ai-v2.svg",
-        teenpatti: "assets/table-ai-v2.svg",
+        teenpatti: "assets/cards-ai-cover.svg",
         ander: "assets/table-ai-v2.svg",
-        sangong: "assets/table-ai-v2.svg",
-        showhand: "assets/table-ai-v2.svg",
+        sangong: "assets/cards-ai-cover.svg",
+        showhand: "assets/cards-ai-cover.svg",
         dragon: "assets/dragon-ai-cover.svg",
         thor: "assets/thor-ai-cover.svg",
         fortune: "assets/slot-ai-v2.svg",
@@ -7636,7 +7728,16 @@
         const symbols = game.id === "thor" ? ["⚡", "A", "K", "W", "10"] : game.id === "fruit" ? ["7", "🍒", "BAR", "🍋", "★"] : [game.icon, "W", "K", "A", "10"];
         return `<span class="table-preview slot-scene">${symbols.map((item, index) => `<span class="slot-tile" style="animation-delay:${index * 80}ms">${item}</span>`).join("")}</span>`;
       }
-      if (["dragon", "crashcar", "dice", "sicbo", "roulette", "ander", "penalty", "duel", "derby", "hoops", "darts", "bowling", "nineball", "boxing", "serve", "moto", "keeper", "space-race", "speed-baccarat", "super-six", "redblack", "goal-rush", "cyber-arena"].includes(game.id)) {
+      if (["baccarat", "speed-baccarat", "super-six", "redblack", "roulette"].includes(game.id)) {
+        const center = game.id === "super-six" ? "6" : game.id === "redblack" ? "同花" : game.id === "roulette" ? "0" : "和";
+        return `<span class="table-preview chips-scene"><span class="chip-token blue">闲</span><span class="chips-divider"></span><span class="chip-token gold">${center}</span><span class="chips-divider"></span><span class="chip-token">庄</span></span>`;
+      }
+      if (["texas", "showhand", "zhajinhua", "teenpatti", "sangong", "paijiu"].includes(game.id)) {
+        const seat = game.id === "texas" ? "POT" : game.id === "showhand" ? "SHOW" : game.id === "zhajinhua" ? "金花" : game.id === "teenpatti" ? "3P" : game.id === "sangong" ? "三公" : "牌九";
+        const cards = game.id === "texas" ? ["A♠", "K♣", "Q♦"] : game.id === "showhand" ? ["A♥", "K♠", "J♦"] : game.id === "paijiu" ? ["九", "天", "地"] : [game.icon, "K", "A"];
+        return `<span class="table-preview poker-scene"><span class="poker-seat">${seat}</span>${cards.map(card => `<span class="mini-card">${card}</span>`).join("")}</span>`;
+      }
+      if (["dragon", "crashcar", "dice", "sicbo", "ander", "penalty", "duel", "derby", "hoops", "darts", "bowling", "nineball", "boxing", "serve", "moto", "keeper", "space-race", "goal-rush", "cyber-arena"].includes(game.id)) {
         const left = game.id === "crashcar" ? "红" : game.id === "ander" ? "安" : game.id === "roulette" ? "红" : game.id === "sicbo" || game.id === "dice" ? "小" : "龙";
         const right = game.id === "crashcar" ? "金" : game.id === "ander" ? "巴" : game.id === "roulette" ? "黑" : game.id === "sicbo" || game.id === "dice" ? "大" : "虎";
         const custom = {
@@ -7665,14 +7766,14 @@
         const marks = game.id === "runner" ? ["x1", "x2", "爆"] : game.id === "mines" ? ["◆", "◆", "雷"] : game.id === "fish" ? ["鱼", "炮", "x"] : ["●", "x", "★"];
         return `<span class="table-preview arcade-scene">${marks.map(mark => `<span class="arcade-token">${mark}</span>`).join("")}<span class="lane-line"></span></span>`;
       }
-      const cards = game.id === "baccarat" ? ["闲", "和", "庄"] : game.id === "blackjack" ? ["A", "10", "J"] : game.id === "niuniu" ? ["牛", "K", "A"] : [game.icon, "K", "A"];
+      const cards = game.id === "blackjack" ? ["A", "10", "J"] : game.id === "niuniu" ? ["牛", "K", "A"] : [game.icon, "K", "A"];
       return `<span class="table-preview"><span class="robot">AI</span>${cards.map(card => `<span class="mini-card">${card}</span>`).join("")}</span>`;
     }
 
     function gameInfoRow(game) {
       const min = game.id === "thor" ? "最低 0.25" : game.id === "runner" ? "最低 0.5" : "最低 1";
-      const mode = isAutoSpinGame(game.id) ? "老虎机" : isBoardGameId(game.id) ? "筹码下注" : game.id === "blackjack" ? "要牌/停牌" : game.id === "runner" ? "手动拿起" : "积分局";
-      const reward = game.id === "runner" ? "最高 x1000" : game.id === "thor" ? "5电免费局" : isBoardGameId(game.id) ? "三路盘口" : "机器人开局";
+      const mode = isAutoSpinGame(game.id) ? "老虎机" : ["baccarat", "speed-baccarat", "super-six", "redblack", "roulette"].includes(game.id) ? "筹码牌桌" : isBoardGameId(game.id) ? "三路下注" : game.id === "blackjack" ? "要牌/停牌" : game.id === "runner" ? "手动拿起" : "积分局";
+      const reward = game.id === "runner" ? "最高 x1000" : game.id === "thor" ? "5电免费局" : ["texas", "showhand", "zhajinhua", "teenpatti"].includes(game.id) ? "扑克对局" : isBoardGameId(game.id) ? "可撤销/加倍" : "机器人开局";
       return `<span class="game-info-row"><i>${min}</i><i>${mode}</i><i class="hot">${reward}</i></span>`;
     }
 
@@ -7680,8 +7781,8 @@
       const seed = Array.from(`${game.id}-${new Date().toDateString()}`).reduce((sum, char) => sum + char.charCodeAt(0), 0);
       const shoe = isAutoSpinGame(game.id) ? "转轴 " + (seed % 6 + 1) : "牌靴 " + (seed % 8 + 1);
       const round = String((seed * 17) % 900 + 100);
-      const table = game.cat === "牌桌" ? "AI桌 " + (seed % 18 + 1) : game.cat === "老虎机" ? "机台 " + (seed % 12 + 1) : "房间 " + (seed % 20 + 1);
-      const mode = isBoardGameId(game.id) ? "筹码连投" : game.id === "blackjack" ? "要牌停牌" : isAutoSpinGame(game.id) ? "自动可开" : game.id === "runner" ? "手动拿起" : "即时结算";
+      const table = game.cat === "牌桌" ? (["texas", "showhand", "zhajinhua", "teenpatti"].includes(game.id) ? "扑克厅 " : ["baccarat", "speed-baccarat", "super-six"].includes(game.id) ? "贵宾桌 " : "AI桌 ") + (seed % 18 + 1) : game.cat === "老虎机" ? "机台 " + (seed % 12 + 1) : "房间 " + (seed % 20 + 1);
+      const mode = ["baccarat", "speed-baccarat", "super-six", "redblack", "roulette"].includes(game.id) ? "筹码连投" : game.id === "blackjack" ? "要牌停牌" : isAutoSpinGame(game.id) ? "自动可开" : game.id === "runner" ? "手动拿起" : "即时结算";
       return [
         ["局号", "#" + round],
         ["牌靴/转轴", shoe],
@@ -7701,10 +7802,16 @@
     function roomGuideData(game) {
       if (!game) return { title: "积分游戏", body: "选择游戏后查看玩法提示。", pills: ["积分体验"] };
       if (game.id === "blackjack") {
-        return { title: "21点玩法", body: "开局后可以选择要牌或停牌，玩家点数接近 21 且不爆牌即胜。黑杰克和普通胜局都会计入牌桌战绩。", pills: ["最低 1 分", "要牌 / 停牌", "机器人荷官", "即时结算"] };
+        return { title: "贵宾21点桌", body: "进入后先下注，再按节奏选择要牌或停牌。这个房间强调黑金桌感和 AI 荷官开局速度，结果会记录进本房战绩。", pills: ["最低 1 分", "要牌 / 停牌", "AI 荷官", "贵宾桌"] };
       }
       if (game.id === "baccarat") {
-        return { title: "百家乐筹码桌", body: "先选筹码，再点闲、平、庄下注，可连续点多次叠加筹码，开始后机器人发牌并按牌点结算。", pills: ["闲/庄 2:1返还", "平局 8:1", "可撤销", "可加倍"] };
+        return { title: "贵宾百家乐厅", body: "先选筹码，再点闲、和、庄下注，可连续叠加、撤销和加倍。整个房间更偏向真实牌路厅的筹码操作体验。", pills: ["闲/庄 2:1返还", "和局 8:1", "可撤销", "可加倍"] };
+      }
+      if (game.id === "speed-baccarat") {
+        return { title: "竞速百家乐", body: "适合想要更快节奏的人，下注方式和百家乐一致，但更强调连续开局和快速回合切换。", pills: ["快靴开局", "闲 / 和 / 庄", "连续下注", "FAST"] };
+      }
+      if (game.id === "super-six") {
+        return { title: "超级六贵宾桌", body: "庄闲基础盘之外保留超级六高倍位，适合想玩高倍中心区的牌桌用户。", pills: ["庄闲基础盘", "超级六高倍", "筹码叠投", "VIP"] };
       }
       if (game.id === "thor") {
         return { title: "雷神 5x5 掉落", body: "每拉一次会有约 0.8 秒转轴掉落动画。出现 5 个电符号进入 15 次免费游戏，免费局再中 5 电加 3 次。", pills: ["单拉 0.25", "自动转", "5 电触发", "免费倍率"] };
@@ -7718,8 +7825,11 @@
       if (["mines", "plinko", "fish"].includes(game.id)) {
         return { title: `${game.name}街机玩法`, body: "选择下注后进入互动场景，命中目标、落入倍率槽或避开雷点即可按倍率结算。", pills: ["互动场景", "倍率结算", "最低 1 分", "记录战绩"] };
       }
+      if (["texas", "showhand", "zhajinhua", "teenpatti", "sangong", "paijiu"].includes(game.id)) {
+        return { title: `${game.name}`, body: "这条线改成更像扑克俱乐部的体验，重点是牌型感和房间氛围，而不是单纯三路下注。开局后系统会自动生成对局牌面。", pills: ["扑克室风格", "牌型对局", "即时结算", "本房战绩"] };
+      }
       if (isBoardGameId(game.id)) {
-        return { title: `${game.name}筹码盘`, body: "先选筹码，再点上方下注区，可连续叠加、撤销、加倍或清空，开始后按对应赔率结算。", pills: ["筹码连投", "1 / 2.5 / 5", "10 / 50 / 100", "可加倍"] };
+        return { title: `${game.name}筹码盘`, body: "先选筹码，再点上方下注区，可连续叠加、撤销、加倍或清空，开始后按对应赔率结算。这个房间更偏向真实牌台的下注手感。", pills: ["筹码连投", "1 / 2.5 / 5", "10 / 50 / 100", "可加倍"] };
       }
       return { title: `${game.name}积分房`, body: "选择下注积分后开始，机器人系统会自动生成结果并保留最近 7 天房间战绩。", pills: ["积分玩法", "即时结算", "房间战绩"] };
     }
@@ -7838,7 +7948,7 @@
         worldCup ? `世界杯未来3天 · ${worldCupCount} 场 · 当前主推 ${worldCup.home} VS ${worldCup.away}` : "世界杯盘口等待上架",
         todayCount ? `今天有 ${todayCount} 场赛事 · 首页优先显示今天全部比赛` : "今天暂无自动赛事",
         nbaMatch ? `NBA · ${nbaMatch.home} VS ${nbaMatch.away} · 胜负/让分/大小分` : "NBA 热门盘口准备中",
-        `娱乐场 · ${games.filter(game => game.playable).length} 个游戏 · 牌桌/老虎机/创新`,
+        `娱乐场 · ${games.filter(game => game.playable).length} 个游戏 · 贵宾牌桌/机台/创新`,
         latestLog ? `最近流水 · ${publicLogItem(latestLog.item)} · ${latestLog.status} ${latestLog.result > 0 ? "+" : ""}${fmt(latestLog.result)}` : "新号注册 0 分 · 可到我的页面申请积分",
         "客服 WhatsApp 0178541111 · 24h 在线"
       ];
@@ -7846,7 +7956,7 @@
       const hotGames = ["baccarat", "blackjack", "thor", "runner"].map(id => games.find(game => game.id === id)).filter(Boolean);
       const cards = [
         { label: "今日主推", title: firstMatch ? `${firstMatch.home} VS ${firstMatch.away}` : "等待赛事上架", meta: firstMatch ? `${firstMatch.sport} · ${firstMatch.markets.length} 盘口 · 今日 ${todayCount} 场` : "自动更新" },
-        { label: "热门牌桌", title: hotGames[0]?.name || "百家乐", meta: "筹码下注 · 可撤销/加倍" },
+        { label: "热门牌桌", title: hotGames[0]?.name || "贵宾百家乐", meta: "贵宾厅风格 · 可撤销/加倍" },
         { label: "老虎机", title: hotGames[2]?.name || "雷神", meta: "5x5 掉落 · 自动转" },
         { label: "世界杯专区", title: worldCupCount ? `${worldCupCount} 场 3 天赛程` : "等待世界杯上架", meta: worldCup ? `${worldCup.home} VS ${worldCup.away}` : "自动更新真实赔率" }
       ];
@@ -7900,7 +8010,7 @@
         value: `${Number(log.result || 0) >= 0 ? "+" : ""}${fmt(log.result)}`
       })) : [
         { text: "新号注册后积分为 0", value: "申请积分" },
-        { text: "百家乐筹码台待开局", value: "闲/平/庄" },
+        { text: "贵宾百家乐厅待开局", value: "闲/和/庄" },
         { text: "雷神 5x5 掉落机台", value: "0.25/拉" }
       ];
       const topMatches = ordered.slice(0, 4).map(match => {
@@ -8001,7 +8111,7 @@
         .map(log => log.item.replace(" 游戏局", ""));
       const unique = [...new Set(names)];
       const recent = unique.map(name => games.find(game => game.name === name)).filter(Boolean).slice(0, 8);
-      const fallback = games.filter(game => ["blackjack", "baccarat", "dragon", "zhajinhua", "texas", "paijiu", "teenpatti", "ander", "sangong", "showhand", "thor", "fortune", "aztec", "dragon-treasure", "space-spin", "fruit", "candy-pop", "gold-panther", "neon-gate", "runner", "dice", "mines", "plinko", "crashcar", "roulette", "fish", "sicbo"].includes(game.id));
+      const fallback = games.filter(game => ["baccarat", "blackjack", "speed-baccarat", "dragon", "texas", "showhand", "zhajinhua", "paijiu", "niuniu", "sangong", "thor", "fortune", "aztec", "dragon-treasure", "space-spin", "fruit", "candy-pop", "gold-panther", "neon-gate", "runner", "dice", "mines", "plinko", "crashcar", "roulette", "fish", "sicbo"].includes(game.id));
       const list = recent.length ? recent : fallback;
       document.getElementById("recentGames").innerHTML = list.map(g => `
         <button class="game ${g.playable ? "" : "locked"}" data-game="${g.id}" data-cover="${g.icon}" style="${gameThemeStyle(g)}">
@@ -8793,7 +8903,7 @@
       renderRoomGuide(activeGame);
       document.getElementById("dealerSpeech").textContent = "机器人荷官已准备好。";
       document.getElementById("roomResult").textContent = "等待开局";
-      document.getElementById("playRound").textContent = gameId === "thor" ? "拉动老虎机" : gameId === "fortune" ? "转动财神" : gameId === "aztec" ? "开启神庙" : gameId === "dragon-treasure" ? "开启宝藏" : gameId === "space-spin" ? "启动星舰" : gameId === "fruit" ? "旋转水果" : gameId === "candy-pop" ? "旋转糖果" : gameId === "gold-panther" ? "开启金豹" : gameId === "neon-gate" ? "启动星门" : gameId === "runner" ? "开始奔跑" : gameId === "blackjack" ? "开始发牌" : gameId === "zhajinhua" ? "开三张" : gameId === "teenpatti" ? "开印度三张" : gameId === "texas" ? "开德州" : gameId === "paijiu" ? "开牌九" : gameId === "ander" ? "开安达巴哈" : gameId === "sangong" ? "开三公" : gameId === "showhand" ? "开梭哈" : gameId === "mines" ? "开始探宝" : gameId === "plinko" ? "投下弹珠" : gameId === "crashcar" ? "开始冲刺" : gameId === "derby" ? "赛马开跑" : gameId === "penalty" ? "射门结算" : gameId === "duel" ? "开始对枪" : gameId === "hoops" ? "投三分" : gameId === "roulette" ? "旋转轮盘" : gameId === "fish" ? "换一批鱼" : gameId === "sicbo" ? "开骰宝" : "开始本局";
+      document.getElementById("playRound").textContent = gameId === "thor" ? "拉动老虎机" : gameId === "fortune" ? "转动财神" : gameId === "aztec" ? "开启神庙" : gameId === "dragon-treasure" ? "开启宝藏" : gameId === "space-spin" ? "启动星舰" : gameId === "fruit" ? "旋转水果" : gameId === "candy-pop" ? "旋转糖果" : gameId === "gold-panther" ? "开启金豹" : gameId === "neon-gate" ? "启动星门" : gameId === "runner" ? "开始奔跑" : gameId === "blackjack" ? "贵宾发牌" : gameId === "zhajinhua" ? "开炸金花" : gameId === "teenpatti" ? "开三张扑克" : gameId === "texas" ? "开德州局" : gameId === "paijiu" ? "开牌九局" : gameId === "ander" ? "开安达巴哈" : gameId === "sangong" ? "开三公局" : gameId === "showhand" ? "开梭哈局" : gameId === "mines" ? "开始探宝" : gameId === "plinko" ? "投下弹珠" : gameId === "crashcar" ? "开始冲刺" : gameId === "derby" ? "赛马开跑" : gameId === "penalty" ? "射门结算" : gameId === "duel" ? "开始对枪" : gameId === "hoops" ? "投三分" : gameId === "roulette" ? "旋转轮盘" : gameId === "fish" ? "换一批鱼" : gameId === "sicbo" ? "开骰宝" : "开始本局";
       if (genericBoardGames[gameId]) {
         document.getElementById("playRound").textContent = genericBoardGames[gameId].action;
         document.getElementById("dealerSpeech").textContent = genericBoardGames[gameId].speech;

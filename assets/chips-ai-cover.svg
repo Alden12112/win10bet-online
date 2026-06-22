@@ -1,15 +1,33 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420">
-  <rect width="900" height="420" fill="#0d2f66"/>
-  <g transform="translate(130 90)">
-    <circle cx="90" cy="90" r="88" fill="#1f78ff"/>
-    <circle cx="90" cy="90" r="58" fill="none" stroke="#fff" stroke-width="12"/>
-    <text x="58" y="110" font-family="Arial" font-size="54" font-weight="900" fill="#fff">10</text>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#0c1830"/>
+      <stop offset=".5" stop-color="#12335c"/>
+      <stop offset="1" stop-color="#1d1021"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="420" fill="url(#bg)"/>
+  <circle cx="706" cy="104" r="172" fill="#ffd66b" opacity=".18"/>
+  <circle cx="182" cy="76" r="124" fill="#36cfff" opacity=".15"/>
+  <g transform="translate(114 82)">
+    <circle cx="92" cy="92" r="90" fill="#b91c1c"/>
+    <circle cx="92" cy="92" r="62" fill="none" stroke="#fff" stroke-width="14"/>
+    <circle cx="92" cy="92" r="26" fill="none" stroke="#fff" stroke-width="8"/>
+    <text x="56" y="110" font-family="Arial" font-size="54" font-weight="900" fill="#fff">5</text>
   </g>
-  <g transform="translate(270 136)">
-    <circle cx="90" cy="90" r="88" fill="#ffcf4a"/>
-    <circle cx="90" cy="90" r="58" fill="none" stroke="#fff" stroke-width="12"/>
-    <text x="58" y="110" font-family="Arial" font-size="54" font-weight="900" fill="#10213f">50</text>
+  <g transform="translate(256 124)">
+    <circle cx="92" cy="92" r="90" fill="#1f78ff"/>
+    <circle cx="92" cy="92" r="62" fill="none" stroke="#fff" stroke-width="14"/>
+    <circle cx="92" cy="92" r="26" fill="none" stroke="#fff" stroke-width="8"/>
+    <text x="42" y="110" font-family="Arial" font-size="52" font-weight="900" fill="#fff">10</text>
   </g>
-  <text x="520" y="190" font-family="Arial" font-size="70" font-weight="900" fill="#fff">POINTS</text>
-  <text x="524" y="236" font-family="Arial" font-size="26" font-weight="800" fill="#cfe7ff">CHIPS · BALANCE · REQUEST</text>
+  <g transform="translate(400 88)">
+    <circle cx="102" cy="102" r="100" fill="#ffcf4a"/>
+    <circle cx="102" cy="102" r="70" fill="none" stroke="#fff6d5" stroke-width="16"/>
+    <circle cx="102" cy="102" r="30" fill="none" stroke="#fff6d5" stroke-width="8"/>
+    <text x="58" y="122" font-family="Arial" font-size="56" font-weight="900" fill="#10213f">50</text>
+  </g>
+  <text x="606" y="150" font-family="Arial" font-size="64" font-weight="900" fill="#fff">VIP CHIPS</text>
+  <text x="608" y="200" font-family="Arial" font-size="24" font-weight="800" fill="#dcecff">POINTS · BALANCE · CASHIER</text>
+  <text x="608" y="244" font-family="Arial" font-size="20" font-weight="700" fill="#fff2c4">APPLY POINTS · SERVICE · ACCOUNT</text>
 </svg>
