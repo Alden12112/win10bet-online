@@ -6,6 +6,9 @@ const crypto = require("crypto");
 const PORT = Number(process.env.PORT || 4180);
 const ADMIN_USER = process.env.ADMIN_USER || "win10bet-admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "W10b@Admin-728419";
+const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID || "";
+const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN || "";
+const TWILIO_VERIFY_SERVICE_SID = process.env.TWILIO_VERIFY_SERVICE_SID || "";
 const ROOT = __dirname;
 const ASSETS = path.join(ROOT, "assets");
 const DATA_DIR = process.env.DATA_DIR || ROOT;
@@ -20,6 +23,10 @@ const text = {
   badPhone: "\u8bf7\u8f93\u5165\u6b63\u786e\u624b\u673a\u53f7",
   captchaRequired: "\u8bf7\u5b8c\u6210\u4eba\u673a\u9a8c\u8bc1",
   captchaWrong: "\u4eba\u673a\u9a8c\u8bc1\u9519\u8bef",
+  codeRequired: "\u8bf7\u8f93\u5165 WhatsApp \u9a8c\u8bc1\u7801",
+  whatsappUnavailable: "WhatsApp \u9a8c\u8bc1\u672a\u914d\u7f6e",
+  whatsappSendFailed: "WhatsApp \u53d1\u9001\u5931\u8d25",
+  whatsappCodeWrong: "WhatsApp \u9a8c\u8bc1\u7801\u9519\u8bef\u6216\u5df2\u8fc7\u671f",
   userMissing: "\u627e\u4e0d\u5230\u8fd9\u4e2a\u7528\u6237",
   requestMissing: "\u627e\u4e0d\u5230\u8fd9\u4e2a\u7533\u8bf7",
   betMissing: "\u627e\u4e0d\u5230\u8fd9\u5f20\u5f85\u7ed3\u7b97\u5355",
@@ -223,6 +230,54 @@ function validCaptcha(question, answer) {
   const match = q.match(/^(\d+)\s*\+\s*(\d+)$/);
   if (!match) return false;
   return String(Number(match[1]) + Number(match[2])) === a;
+}
+
+function hasWhatsappVerify() {
+  return Boolean(TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN && TWILIO_VERIFY_SERVICE_SID);
+}
+
+function formatPhoneE164(phone) {
+  const cleaned = String(phone || "").replace(/\D/g, "");
+  if (/^60\d{9,10}$/.test(cleaned)) return `+${cleaned}`;
+  if (/^01\d{8,9}$/.test(cleaned)) return `+60${cleaned.slice(1)}`;
+  return "";
+}
+
+async function twilioVerifyRequest(pathname, payload) {
+  const response = await fetch(`https://verify.twilio.com/v2/Services/${TWILIO_VERIFY_SERVICE_SID}${pathname}`, {
+    method: "POST",
+    headers: {
+      authorization: `Basic ${Buffer.from(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`).toString("base64")}`,
+      "content-type": "application/x-www-form-urlencoded"
+    },
+    body: new URLSearchParams(payload).toString()
+  });
+  const textBody = await response.text();
+  let data = {};
+  try {
+    data = textBody ? JSON.parse(textBody) : {};
+  } catch {
+    data = { message: textBody };
+  }
+  if (!response.ok) {
+    throw new Error(data.message || `Twilio verify HTTP ${response.status}`);
+  }
+  return data;
+}
+
+async function requestWhatsappCode(phone) {
+  if (!hasWhatsappVerify()) throw new Error(text.whatsappUnavailable);
+  const to = formatPhoneE164(phone);
+  if (!to) throw new Error(text.badPhone);
+  return twilioVerifyRequest("/Verifications", { To: to, Channel: "whatsapp" });
+}
+
+async function verifyWhatsappCode(phone, code) {
+  if (!hasWhatsappVerify()) throw new Error(text.whatsappUnavailable);
+  const to = formatPhoneE164(phone);
+  if (!to) throw new Error(text.badPhone);
+  const data = await twilioVerifyRequest("/VerificationCheck", { To: to, Code: code });
+  return String(data.status || "").toLowerCase() === "approved";
 }
 
 function ymd(date) {
@@ -499,6 +554,41 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "POST" && url.pathname === "/api/state") {
       const body = await readJson(req);
       return json(res, 200, { ok: true, state: writeState(body.state || body) });
+    }
+    if (req.method === "POST" && url.pathname === "/api/auth/request-whatsapp-code") {
+      const body = await readJson(req);
+      const phone = String(body.phone || body.name || "").trim();
+      if (!phone) return json(res, 400, { ok: false, message: text.accountRequired });
+      if (!validPhone(phone)) return json(res, 400, { ok: false, message: text.badPhone });
+      try {
+        await requestWhatsappCode(phone);
+        return json(res, 200, { ok: true, message: "WhatsApp code sent" });
+      } catch (error) {
+        const message = error.message === text.whatsappUnavailable ? text.whatsappUnavailable : (error.message || text.whatsappSendFailed);
+        return json(res, 503, { ok: false, message });
+      }
+    }
+    if (req.method === "POST" && url.pathname === "/api/auth/register-whatsapp") {
+      const body = await readJson(req);
+      const name = String(body.name || body.phone || "").trim();
+      const pass = String(body.pass || "").trim();
+      const code = String(body.code || "").trim();
+      if (!name) return json(res, 400, { ok: false, message: text.accountRequired });
+      if (!validPhone(name)) return json(res, 400, { ok: false, message: text.badPhone });
+      if (!validPassword(pass)) return json(res, 400, { ok: false, message: text.badPassword });
+      if (!code) return json(res, 400, { ok: false, message: text.codeRequired });
+      const state = readState();
+      if (state.users[name]) return json(res, 409, { ok: false, message: text.duplicate });
+      try {
+        const approved = await verifyWhatsappCode(name, code);
+        if (!approved) return json(res, 400, { ok: false, message: text.whatsappCodeWrong });
+      } catch (error) {
+        const message = error.message === text.whatsappUnavailable ? text.whatsappUnavailable : (error.message || text.whatsappCodeWrong);
+        return json(res, 503, { ok: false, message });
+      }
+      state.users[name] = { name, phone: name, pass, balance: 0, createdAt: now(), verifiedVia: "whatsapp" };
+      addLog(state, name, text.registerLog, 0, 0, text.register);
+      return json(res, 200, { ok: true, currentUser: name, state: writeState(state) });
     }
     if (req.method === "POST" && url.pathname === "/api/register") {
       const body = await readJson(req);
