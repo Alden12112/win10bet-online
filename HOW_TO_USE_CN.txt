@@ -1,114 +1,112 @@
-你最后应该怎么用这个项目
+Win10bet 现在应该怎么用
 
-我已经帮你定好最终方案：
-1. 整个项目上传到 GitHub
-2. 用 Render 部署这个 GitHub 仓库
-3. 后台不要放在 GitHub Pages
-4. 如果你想要 GitHub Pages，只拿它放前台页面
+你要的最终用法，我已经整理成最省事的方式：
 
-最重要的结论
+1. 整个项目放到 GitHub
+2. 用 Render 连接这个 GitHub 仓库
+3. 让 Render 跑这个项目
+4. 用户和你自己都访问 Render 的网址
 
-1. GitHub 是放代码的地方
-GitHub 主要是保存代码、备份、以后更新。
+最重要的一句：
+GitHub 负责放代码和自动更新部署，Render 负责让网站在线、让后台收到用户数据。
 
-2. 后台不放在 GitHub Pages
-GitHub Pages 只能放静态网页，不能运行 Node.js。
-所以管理员后台、共享用户数据、自动更新赛事，这些都不能只靠 GitHub Pages。
+为什么不能只放 GitHub Pages
 
-3. 真正的后台放在 Render
-Render 会运行这个项目里的 Node 服务器：
-outputs/win10bet-server.js
+GitHub Pages 只能放静态网页。
+它不能运行 Node.js 后台，也不能统一保存：
+- 用户注册
+- 手机号登录
+- 积分
+- 投注单
+- 后台日志
+- 自动更新赛事
 
-4. 你给用户的正式网址
-正式前台：
+所以如果你要“别的设备也能打开，而且后台也能收到全部人的数据”，必须用 Render 这种在线服务器。
+
+现在你的正式访问方式
+
+前台：
 https://你的Render域名/win10bet.html
 
-正式后台：
+后台：
 https://你的Render域名/admin.html
 
-这才是“别的设备也能打开，而且后台能收到数据”的正式用法。
+健康检查：
+https://你的Render域名/api/health
 
-如果你还想同时用 GitHub Pages
+GitHub 的作用
 
-你也可以把前台页面放去 GitHub Pages，
-但是它必须连接到你的 Render 后台。
+GitHub 主要做这几件事：
+- 保存项目代码
+- 让你以后继续修改
+- 每次 push 后自动触发 Render 重新部署
+- 做备份，防止本地文件丢失
 
-操作方法：
-1. 发布 docs 文件夹到 GitHub Pages
-2. 打开 docs/win10bet-config.js
-3. 把里面的 apiBase 改成你的 Render 域名
+所以 GitHub 不是没用，它是“代码仓库 + 自动部署入口”。
 
-例如：
-apiBase: "https://你的Render域名"
+Render 的作用
 
-这样 GitHub Pages 前台也会把注册、积分、下注、赛事请求发送到你的 Render 后台。
+Render 才是正式在线服务器，它会：
+- 运行 `npm start`
+- 对外开放网站给别人访问
+- 提供 `/api/state`
+- 提供 `/api/fixtures`
+- 让后台收到注册、登录、积分申请、下注和日志
 
-你到底要上传什么到 GitHub
+自动赛事现在怎么工作
 
-上传整个项目文件夹，不要只上传一个 html。
+现在后端会自动处理赛事，不需要你天天手动改：
+- 优先从 ESPN 抓取接下来几天的 NBA 和世界杯赛事
+- 自动生成赔率市场
+- 自动补充其他项目赛事
+- 如果线上数据临时失败，会自动切到后备赛事，不会让页面空掉
+- `/api/fixtures` 现在带缓存和更新时间，减少反复请求
 
-重点文件包括：
-- package.json
-- render.yaml
-- outputs/win10bet-server.js
-- outputs/admin.html
-- outputs/assets/*
-- docs/*
+免费版 Render 要知道的事
 
-你不要怎么用
-
-不要只把 win10bet.html 单独上传到 GitHub Pages。
-如果你这样做：
-- 每个人数据会分开
-- 后台收不到统一数据
-- 自动赛事不会真正变成共享后台赛事
-
-Render 怎么填
-
-创建 Render Web Service 后：
-
-Build Command:
-npm install
-
-Start Command:
-npm start
-
-环境变量：
-ADMIN_USER=win10bet-admin
-ADMIN_PASSWORD=你自己的后台密码
-DATA_DIR=/var/data
-
-还要做：
-开启 persistent disk
-挂载到：
-/var/data
-
-为什么要开 persistent disk
-
-因为它要保存：
+免费版可以先上线测试给别人打开。
+但是免费版使用临时存储，服务重启后这些数据可能会被清掉：
 - 用户
 - 积分
-- 请求
-- 日志
-- 待结算下注
+- 请求记录
+- 部分后台数据
 
-不然服务器重启后数据可能没了。
+如果你以后要长期正式运营，建议升级到带 persistent disk 的方案。
 
-我已经帮你准备好的东西
+你现在上传到 GitHub 后，应该保留这些文件
 
-1. 项目已经适合 Render 跑后台
-2. docs 文件夹已经准备好给 GitHub Pages 用
-3. 前台已经支持连接远程 API
-4. 后台已经支持连接远程 API
-5. 自动赛事接口已经保留
+- `package.json`
+- `render.yaml`
+- `win10bet-server.js`
+- `admin.html`
+- `assets/*`
+- `docs/*`
 
-你最后最省事的用法
+Render 现在的基本配置
 
-最推荐你直接这样：
+Build Command:
+`npm install`
 
-只把整个项目上传 GitHub
-然后直接用 Render 跑
-用户全部访问：
-https://你的Render域名/win10bet.html
+Start Command:
+`npm start`
 
-这样最简单，最稳，也最不容易出错。
+环境变量建议：
+- `ADMIN_USER`
+- `ADMIN_PASSWORD`
+- `DATA_DIR`
+- `FIXTURE_CACHE_TTL_MS`
+
+如果你以后还想加 GitHub Pages
+
+可以，但只建议拿来放前台静态页。
+真正的数据和后台还是要走 Render。
+
+也就是说：
+GitHub Pages = 前台壳
+Render = 真正后台和统一数据
+
+最省事的最终方案
+
+直接把整个项目放 GitHub，然后由 Render 自动部署。
+以后你改代码并 push，Render 就会自动更新。
+用户统一访问 Render 上线地址，这样后台才能收到所有人的数据。

@@ -6831,8 +6831,10 @@
       if (!API_ENABLED) return;
       try {
         const data = await apiFetch("/api/fixtures");
+        const serverFixtures = Array.isArray(data.fixtures) ? data.fixtures : [];
+        const hasServerFixtures = serverFixtures.length > 0;
         pruneAutoMatches();
-        (data.fixtures || []).forEach(fixture => {
+        serverFixtures.forEach(fixture => {
           const existing = matches.find(match => match.id === fixture.id);
           const time = formatMatchTime(fixture.startAt);
           const markets = Array.isArray(fixture.markets) && fixture.markets.length
@@ -6865,6 +6867,14 @@
           if (existing) Object.assign(existing, nextMatch);
           else matches.push(nextMatch);
         });
+        if (hasServerFixtures) {
+          for (let index = matches.length - 1; index >= 0; index -= 1) {
+            const match = matches[index];
+            if (!String(match.id || "").startsWith("local-auto-wc-")) continue;
+            const hasTicket = (state.openBets || []).some(bet => bet.matchId === match.id);
+            if (!hasTicket) matches.splice(index, 1);
+          }
+        }
         pruneAutoMatches();
       } catch {
         apiOnline = false;
@@ -10447,7 +10457,9 @@
       seedAutoWorldCupMatches();
       await syncFromServer();
       await syncFixturesFromServer();
-      seedAutoWorldCupMatches();
+      if (!matches.some(match => match.auto && !String(match.id || "").startsWith("local-auto-wc-"))) {
+        seedAutoWorldCupMatches();
+      }
       if (state.currentUser && user()) enterMain();
       else enterAuth();
       if (API_ENABLED) {

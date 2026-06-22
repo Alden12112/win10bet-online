@@ -30,8 +30,9 @@ Render quick deploy:
 3. Render can read render.yaml automatically.
 4. Build command: npm install
 5. Start command: npm start
-6. DATA_DIR should be /var/data.
-7. Keep the persistent disk enabled. This stores users, points, logs, and bets.
+6. For the current free setup, DATA_DIR is /tmp/win10bet-data.
+7. Free Render storage is temporary, so data can reset after restart/redeploy.
+8. If you want long-term saved users, points, logs, and bets, move to a paid persistent disk and set DATA_DIR to that mounted path.
 
 URLs after deploy:
 Front:
@@ -64,5 +65,6 @@ login, point request, bet, pending ticket, and log goes to your admin.
 
 Sports automation:
 /api/fixtures provides World Cup and NBA matches for the next 5 days.
+It now includes metadata such as generated time, cache age, and source status.
 Finished matches are removed automatically.
 If internet fetch fails, the server uses fallback matches so the page is not empty.

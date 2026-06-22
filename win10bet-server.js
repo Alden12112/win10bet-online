@@ -14,6 +14,10 @@ const ASSETS = path.join(ROOT, "assets");
 const DATA_DIR = process.env.DATA_DIR || ROOT;
 const STATE_FILE = path.join(DATA_DIR, "win10bet-shared-state.json");
 const DAY = 24 * 60 * 60 * 1000;
+const FIXTURE_CACHE_TTL_MS = Number(process.env.FIXTURE_CACHE_TTL_MS || 3 * 60 * 1000);
+
+let fixtureCache = null;
+let fixtureRefreshPromise = null;
 
 const text = {
   accountRequired: "\u8bf7\u8f93\u5165\u624b\u673a\u53f7",
@@ -668,6 +672,21 @@ async function remoteFixtures() {
   return fixtures;
 }
 
+function sortFixtures(list) {
+  return [...list].sort((a, b) => a.priority - b.priority || new Date(a.startAt).getTime() - new Date(b.startAt).getTime());
+}
+
+function dedupeFixtures(list) {
+  const seen = new Set();
+  return sortFixtures(list.filter(item => {
+    if (!item?.id || !item?.endAt) return false;
+    if (Date.now() >= new Date(item.endAt).getTime()) return false;
+    if (seen.has(item.id)) return false;
+    seen.add(item.id);
+    return true;
+  }));
+}
+
 function supplementalFixtures() {
   const sports = [
     { sport: "网球", league: "ATP 热门场", teams: [["Carlos Alcaraz", "Alex de Minaur"], ["Novak Djokovic", "Taylor Fritz"], ["Jannik Sinner", "Ben Shelton"]], hours: [14, 19, 22], duration: 125, ticket: "flow" },
@@ -768,29 +787,119 @@ function fallbackFixtures() {
       fixtures.push(wcFixture);
     }
   }
-  return [...fixtures, ...supplementalFixtures()]
-    .filter(item => Date.now() < new Date(item.endAt).getTime())
-    .sort((a, b) => a.priority - b.priority || new Date(a.startAt).getTime() - new Date(b.startAt).getTime());
+  return dedupeFixtures([...fixtures, ...supplementalFixtures()]);
 }
 
-async function autoFixtures() {
+function makeFixturePayload(fixtures, sourceStatus = {}, generatedAt = now()) {
+  const cacheExpiresAt = new Date(new Date(generatedAt).getTime() + FIXTURE_CACHE_TTL_MS).toISOString();
+  return {
+    fixtures,
+    meta: {
+      generatedAt,
+      cacheExpiresAt,
+      sourceStatus: {
+        remote: sourceStatus.remote || "cold",
+        fallbackUsed: Boolean(sourceStatus.fallbackUsed),
+        stale: Boolean(sourceStatus.stale),
+        remoteCount: Number(sourceStatus.remoteCount || 0),
+        supplementalCount: Number(sourceStatus.supplementalCount || 0),
+        totalCount: fixtures.length,
+        lastError: String(sourceStatus.lastError || "")
+      }
+    }
+  };
+}
+
+function cloneFixturePayload(payload, cached = false) {
+  const safePayload = payload || makeFixturePayload([], { remote: "empty", fallbackUsed: true, stale: true });
+  const generatedAt = safePayload.meta?.generatedAt || now();
+  const sourceStatus = safePayload.meta?.sourceStatus || {};
+  return {
+    fixtures: Array.isArray(safePayload.fixtures) ? safePayload.fixtures : [],
+    meta: {
+      generatedAt,
+      cacheExpiresAt: safePayload.meta?.cacheExpiresAt || new Date(new Date(generatedAt).getTime() + FIXTURE_CACHE_TTL_MS).toISOString(),
+      cacheAgeMs: Math.max(0, Date.now() - new Date(generatedAt).getTime()),
+      cached,
+      sourceStatus: {
+        remote: sourceStatus.remote || "cold",
+        fallbackUsed: Boolean(sourceStatus.fallbackUsed),
+        stale: Boolean(sourceStatus.stale),
+        remoteCount: Number(sourceStatus.remoteCount || 0),
+        supplementalCount: Number(sourceStatus.supplementalCount || 0),
+        totalCount: Array.isArray(safePayload.fixtures) ? safePayload.fixtures.length : Number(sourceStatus.totalCount || 0),
+        lastError: String(sourceStatus.lastError || "")
+      }
+    }
+  };
+}
+
+function fixtureCacheExpired() {
+  if (!fixtureCache?.meta?.cacheExpiresAt) return true;
+  return Date.now() >= new Date(fixtureCache.meta.cacheExpiresAt).getTime();
+}
+
+async function refreshFixtureCache() {
+  const supplemental = supplementalFixtures();
   try {
     const live = await remoteFixtures();
     if (live.length) {
-      const merged = [...live, ...supplementalFixtures()];
-      const seen = new Set();
-      return merged
-        .filter(item => {
-          if (seen.has(item.id)) return false;
-          seen.add(item.id);
-          return Date.now() < new Date(item.endAt).getTime();
-        })
-        .sort((a, b) => a.priority - b.priority || new Date(a.startAt).getTime() - new Date(b.startAt).getTime());
+      fixtureCache = makeFixturePayload(
+        dedupeFixtures([...live, ...supplemental]),
+        {
+          remote: "live",
+          fallbackUsed: false,
+          remoteCount: live.length,
+          supplementalCount: supplemental.length,
+          stale: false
+        }
+      );
+      return cloneFixturePayload(fixtureCache, false);
     }
-  } catch {
-    // Offline fallback keeps the sportsbook populated without manual work.
+    fixtureCache = makeFixturePayload(
+      fallbackFixtures(),
+      {
+        remote: "empty",
+        fallbackUsed: true,
+        remoteCount: 0,
+        supplementalCount: supplemental.length,
+        stale: false
+      }
+    );
+    return cloneFixturePayload(fixtureCache, false);
+  } catch (error) {
+    fixtureCache = makeFixturePayload(
+      fallbackFixtures(),
+      {
+        remote: "error",
+        fallbackUsed: true,
+        remoteCount: 0,
+        supplementalCount: supplemental.length,
+        stale: false,
+        lastError: error?.message || "remote fixtures failed"
+      }
+    );
+    return cloneFixturePayload(fixtureCache, false);
   }
-  return fallbackFixtures();
+}
+
+async function autoFixtures(forceRefresh = false) {
+  if (!forceRefresh && fixtureCache && !fixtureCacheExpired()) {
+    return cloneFixturePayload(fixtureCache, true);
+  }
+  if (!fixtureRefreshPromise) {
+    fixtureRefreshPromise = refreshFixtureCache().finally(() => {
+      fixtureRefreshPromise = null;
+    });
+  }
+  try {
+    return await fixtureRefreshPromise;
+  } catch {
+    return cloneFixturePayload(
+      fixtureCache || makeFixturePayload(fallbackFixtures(), { remote: "error", fallbackUsed: true, stale: true }),
+      false
+    );
+  }
 }
 
 function serveStatic(req, res) {
@@ -920,7 +1029,8 @@ const server = http.createServer(async (req, res) => {
       });
     }
     if (req.method === "GET" && url.pathname === "/api/fixtures") {
-      return json(res, 200, { ok: true, fixtures: await autoFixtures() });
+      const payload = await autoFixtures(url.searchParams.get("refresh") === "1");
+      return json(res, 200, { ok: true, fixtures: payload.fixtures, meta: payload.meta });
     }
     if (req.method === "POST" && url.pathname === "/api/state") {
       const body = await readJson(req);
