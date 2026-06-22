@@ -42,7 +42,7 @@ Render settings:
 What is already prepared in this project:
 - render.yaml exists
 - package.json start script exists
-- outputs/win10bet-server.js serves frontend + admin + API
+- win10bet-server.js serves frontend + admin + API
 - /api/fixtures auto-loads upcoming fixtures
 - docs folder is prepared for GitHub Pages
 - docs/win10bet-config.js is ready for your online API domain

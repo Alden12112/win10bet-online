@@ -3,7 +3,7 @@ WIN10BET GITHUB + ONLINE SERVER DEPLOY
 Important:
 GitHub Pages alone is static hosting. It cannot run the Node API server and
 cannot save central user registration data by itself. For central admin and
-shared user data, you must run outputs/win10bet-server.js on an online Node server.
+shared user data, you must run win10bet-server.js on an online Node server.
 
 What GitHub is for:
 1. Upload this whole folder to a GitHub repository.

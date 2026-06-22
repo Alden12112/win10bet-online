@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "description": "Win10bet frontend, admin, and central API server.",
-  "main": "outputs/win10bet-server.js",
+  "main": "win10bet-server.js",
   "scripts": {
-    "start": "node outputs/win10bet-server.js",
+    "start": "node win10bet-server.js",
     "check": "node work/validate-static.js"
   },
   "engines": {
