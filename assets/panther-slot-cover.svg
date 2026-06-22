@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <defs>
+    <linearGradient id="gold" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#fff1bf"/>
+      <stop offset=".45" stop-color="#ddb44e"/>
+      <stop offset="1" stop-color="#0f172a"/>
+    </linearGradient>
+    <radialGradient id="eye" cx=".5" cy=".5" r=".6">
+      <stop offset="0" stop-color="#fff7cc"/>
+      <stop offset="1" stop-color="#ffcf4a"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="360" rx="24" fill="url(#gold)"/>
+  <path d="M38 308c102-88 184-118 290-116 106 3 187 36 274 116z" fill="#0d1b2a" opacity=".82"/>
+  <path d="M208 88c36-44 188-44 224 0 18 22 22 76 2 116-26 51-202 51-228 0-20-40-16-94 2-116z" fill="#111827"/>
+  <path d="M246 92l-42-54 74 31zM394 92l42-54-74 31z" fill="#111827"/>
+  <ellipse cx="276" cy="150" rx="34" ry="16" fill="url(#eye)"/>
+  <ellipse cx="364" cy="150" rx="34" ry="16" fill="url(#eye)"/>
+  <circle cx="276" cy="150" r="7" fill="#0f172a"/>
+  <circle cx="364" cy="150" r="7" fill="#0f172a"/>
+  <path d="M296 194c18 12 30 12 48 0" fill="none" stroke="#ffcf4a" stroke-width="10" stroke-linecap="round"/>
+  <g fill="#ffcf4a" font-family="Arial, sans-serif" font-weight="900" text-anchor="middle">
+    <text x="320" y="275" font-size="42">GOLD PANTHER</text>
+    <text x="320" y="316" font-size="24">TREASURE REELS</text>
+  </g>
+</svg>

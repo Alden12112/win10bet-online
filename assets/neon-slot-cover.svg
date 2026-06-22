@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <defs>
+    <linearGradient id="space" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#07172b"/>
+      <stop offset=".52" stop-color="#123a70"/>
+      <stop offset="1" stop-color="#7c3aed"/>
+    </linearGradient>
+    <filter id="neon" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  <rect width="640" height="360" rx="24" fill="url(#space)"/>
+  <g opacity=".55" fill="#fff">
+    <circle cx="92" cy="70" r="2"/><circle cx="168" cy="46" r="2"/><circle cx="502" cy="62" r="2"/>
+    <circle cx="566" cy="142" r="2"/><circle cx="90" cy="210" r="2"/><circle cx="440" cy="230" r="2"/>
+  </g>
+  <g filter="url(#neon)" fill="none">
+    <ellipse cx="320" cy="170" rx="126" ry="78" stroke="#21d4fd" stroke-width="8"/>
+    <ellipse cx="320" cy="170" rx="78" ry="126" stroke="#ff5f9e" stroke-width="8" transform="rotate(62 320 170)"/>
+    <circle cx="320" cy="170" r="48" stroke="#ffcf4a" stroke-width="7"/>
+  </g>
+  <rect x="262" y="122" width="116" height="96" rx="14" fill="#ffffff" opacity=".92"/>
+  <text x="320" y="185" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" font-weight="900" fill="#1f78ff">门</text>
+  <text x="320" y="306" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="900" fill="#fff">NEON GATE</text>
+</svg>

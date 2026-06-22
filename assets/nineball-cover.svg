@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <defs>
+    <linearGradient id="felt" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#d9f9ea"/>
+      <stop offset="1" stop-color="#0d473b"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#001b16" flood-opacity=".35"/>
+    </filter>
+  </defs>
+  <rect width="640" height="360" fill="url(#felt)"/>
+  <rect x="54" y="52" width="532" height="256" rx="34" fill="#0b3d34" stroke="#ffcf4a" stroke-width="14" filter="url(#shadow)"/>
+  <circle cx="180" cy="188" r="42" fill="#ef4444"/>
+  <circle cx="320" cy="156" r="46" fill="#ffcf4a"/>
+  <circle cx="320" cy="156" r="22" fill="#fff"/>
+  <text x="308" y="168" font-family="Arial" font-size="28" font-weight="900" fill="#0f172a">9</text>
+  <circle cx="452" cy="204" r="42" fill="#1f78ff"/>
+  <path d="M100 268 514 92" stroke="#f8fafc" stroke-width="8" stroke-linecap="round"/>
+  <text x="86" y="104" font-family="Arial, sans-serif" font-size="34" font-weight="900" fill="#fff">NINE BALL</text>
+</svg>

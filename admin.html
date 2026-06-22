@@ -1,0 +1,1294 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>win10bet 后台</title>
+  <style>
+    :root {
+      --bg: #071013;
+      --panel: #101a1f;
+      --panel-2: #18242b;
+      --line: #26363f;
+      --text: #eef6f7;
+      --muted: #9eb0b6;
+      --brand: #19c37d;
+      --brand-2: #ffcf4a;
+      --danger: #ff5f57;
+      --shadow: 0 14px 40px rgba(0, 0, 0, .26);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background: linear-gradient(135deg, rgba(25, 195, 125, .14), transparent 34%), var(--bg);
+      font-family: Arial, "Microsoft YaHei", sans-serif;
+    }
+    button, input, select { font: inherit; }
+    button {
+      border: 0;
+      color: var(--text);
+      background: var(--panel-2);
+      cursor: pointer;
+    }
+    input, select {
+      width: 100%;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 9px 11px;
+      color: var(--text);
+      background: #0a1418;
+      outline: none;
+    }
+    h1, h2, h3, p { margin: 0; }
+    .shell { max-width: 1180px; margin: 0 auto; padding: 16px; }
+    .brand {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 24px; }
+    .mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: #06110d;
+      background: var(--brand);
+    }
+    .card, .panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(16, 26, 31, .94);
+      box-shadow: var(--shadow);
+    }
+    .card { padding: 14px; }
+    .panel { padding: 12px; }
+    .grid { display: grid; grid-template-columns: 340px 1fr; gap: 14px; align-items: start; }
+    .stack { display: grid; gap: 12px; }
+    .field { display: grid; gap: 7px; margin-bottom: 12px; color: var(--muted); font-size: 13px; }
+    .primary {
+      width: 100%;
+      min-height: 42px;
+      border-radius: 6px;
+      color: #06110d;
+      background: var(--brand);
+      font-weight: 900;
+    }
+    .secondary {
+      min-height: 38px;
+      border-radius: 6px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+    }
+    .ghost { background: transparent; }
+    .danger { background: rgba(255, 95, 87, .15); color: #ffd4d1; border-color: rgba(255, 95, 87, .35); }
+    .notice {
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: rgba(25, 195, 125, .12);
+      border: 1px solid rgba(25, 195, 125, .28);
+      color: #c9ffe7;
+      font-size: 13px;
+      line-height: 1.45;
+      margin-bottom: 14px;
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 9px 0;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .row:last-child { border-bottom: 0; }
+    .muted { color: var(--muted); font-size: 13px; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { padding: 9px 6px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; }
+    td button { margin: 0 4px 4px 0; }
+    .rates { display: grid; gap: 12px; }
+    .rate-group {
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.035);
+      border: 1px solid var(--line);
+    }
+    .rate-group-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 9px;
+      color: var(--text);
+      font-weight: 900;
+    }
+    .rate-group-head span {
+      color: var(--brand-2);
+      font-size: 12px;
+    }
+    .rate-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .stat-card {
+      padding: 12px;
+      border-radius: 8px;
+      background: linear-gradient(145deg, rgba(16, 26, 31, .94), rgba(24, 36, 43, .96));
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+    .stat-card span { color: var(--muted); font-size: 12px; }
+    .stat-card strong { display: block; margin-top: 7px; font-size: 22px; color: var(--brand-2); }
+    .ops-monitor {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin: -2px 0 14px;
+    }
+    .ops-card {
+      min-height: 118px;
+      padding: 12px;
+      border-radius: 8px;
+      background:
+        radial-gradient(circle at 92% 10%, rgba(255,207,74,.12), transparent 34%),
+        linear-gradient(145deg, rgba(16, 26, 31, .94), rgba(24, 36, 43, .96));
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      display: grid;
+      gap: 8px;
+    }
+    .ops-card h3 {
+      margin: 0;
+      color: var(--text);
+      font-size: 14px;
+    }
+    .ops-card p {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+    .ops-metrics {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+    }
+    .ops-metrics span {
+      min-height: 42px;
+      padding: 7px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.07);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .ops-metrics strong {
+      display: block;
+      margin-top: 3px;
+      color: var(--brand-2);
+      font-size: 14px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .pending-detail {
+      display: grid;
+      gap: 3px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.25;
+      margin-top: 4px;
+    }
+    .pending-detail strong { color: var(--brand-2); }
+    .filters {
+      display: grid;
+      grid-template-columns: 1fr 1fr 160px;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .quick-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      margin: -2px 0 10px;
+    }
+    .quick-filter {
+      min-height: 30px;
+      border-radius: 999px;
+      padding: 0 11px;
+      color: var(--text);
+      background: rgba(255,255,255,.05);
+      border: 1px solid var(--line);
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .quick-filter.active {
+      color: #06110d;
+      background: var(--brand-2);
+      border-color: transparent;
+    }
+    .log-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .log-summary div {
+      min-height: 54px;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--line);
+    }
+    .log-summary span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      margin-bottom: 5px;
+    }
+    .log-summary strong {
+      color: var(--brand-2);
+      font-size: 18px;
+    }
+    .cleanup-panel {
+      margin-top: 12px;
+      display: grid;
+      gap: 8px;
+      padding: 10px;
+      border-radius: 8px;
+      background:
+        radial-gradient(circle at 90% 12%, rgba(251,191,36,.14), transparent 32%),
+        rgba(255,255,255,.04);
+      border: 1px solid var(--line);
+    }
+    .cleanup-panel h3 {
+      margin: 0;
+      color: var(--text);
+      font-size: 14px;
+    }
+    .cleanup-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+    }
+    .cleanup-grid div {
+      min-height: 48px;
+      display: grid;
+      align-content: center;
+      gap: 3px;
+      padding: 8px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.08);
+    }
+    .cleanup-grid span {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+    }
+    .cleanup-grid strong {
+      color: #d9fff0;
+      font-size: 13px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .log-insights {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .log-insight {
+      min-height: 64px;
+      padding: 10px;
+      border-radius: 8px;
+      background:
+        radial-gradient(circle at 88% 18%, rgba(22,181,111,.14), transparent 30%),
+        rgba(255,255,255,.04);
+      border: 1px solid var(--line);
+      display: grid;
+      align-content: center;
+      gap: 4px;
+    }
+    .log-insight span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .log-insight strong {
+      color: #d9fff0;
+      font-size: 16px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    @media (max-width: 760px) {
+      .log-insights {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+    .user-mini {
+      margin-top: 12px;
+      display: grid;
+      gap: 8px;
+    }
+    .user-mini h3 {
+      margin: 0 0 6px;
+      color: var(--text);
+      font-size: 14px;
+    }
+    .user-mini-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      padding: 8px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.035);
+      border: 1px solid var(--line);
+      font-size: 12px;
+    }
+    .user-mini-row strong {
+      color: var(--brand-2);
+    }
+    .user-mini-row .muted {
+      font-size: 11px;
+    }
+    .user-alerts {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .user-alert {
+      min-height: 70px;
+      display: grid;
+      align-content: center;
+      gap: 4px;
+      padding: 10px;
+      border-radius: 8px;
+      background: linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+      border: 1px solid var(--line);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.025);
+    }
+    .user-alert span {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+    .user-alert strong {
+      color: var(--brand-2);
+      font-size: 16px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .user-actions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 7px;
+      margin-top: 10px;
+    }
+    .user-actions .secondary {
+      width: 100%;
+      padding: 0 8px;
+      font-size: 12px;
+    }
+    .status-win { color: #86efac; font-weight: 900; }
+    .status-lose { color: #fca5a5; font-weight: 900; }
+    .status-pending { color: #fde68a; font-weight: 900; }
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%) translateY(12px);
+      opacity: 0;
+      padding: 12px 14px;
+      border-radius: 8px;
+      color: #06110d;
+      background: var(--brand-2);
+      font-weight: 900;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    @media (max-width: 780px) {
+      .grid, .stats, .filters, .ops-monitor { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="brand">
+      <div class="logo"><span class="mark">W</span>win10bet 后台</div>
+      <button class="secondary ghost" id="backToSite">返回前台</button>
+    </div>
+    <div class="notice">独立后台：搜索注册用户名、给积分、审核积分申请、设置测试账号下一局结果、查看最近 7 天流水。测试结果只用于上架前验证游戏，不会隐藏在用户端。</div>
+    <div class="stats" id="adminStats"></div>
+    <div class="ops-monitor" id="opsMonitor"></div>
+    <div class="grid">
+      <section class="card">
+        <h2 style="font-size:18px;margin-bottom:12px;">用户管理</h2>
+        <div class="field">
+          <label for="adminSearch">注册名字</label>
+          <input id="adminSearch" placeholder="输入用户名搜索">
+        </div>
+        <button class="primary" id="findUser">查找用户</button>
+        <div id="adminUserBox" class="panel" style="margin-top:12px;"><p class="muted">还没有选中用户</p></div>
+        <div class="field" style="margin-top:12px;">
+          <label for="grantAmount">发放积分</label>
+          <input id="grantAmount" type="number" min="1" value="1000000">
+        </div>
+        <button class="primary" id="grantPoints">给该用户加积分</button>
+        <div class="panel" style="margin-top:12px;">
+          <h3 style="font-size:16px;margin-bottom:10px;">测试工具</h3>
+          <div class="field">
+            <label for="forcedResult">选中用户下一局结果</label>
+            <select id="forcedResult">
+              <option value="random">随机</option>
+              <option value="win">下一局赢</option>
+              <option value="lose">下一局输</option>
+            </select>
+          </div>
+          <button class="secondary" id="setForcedResult" style="width:100%;">保存测试结果</button>
+          <p class="muted" style="margin-top:10px;">只影响一次，执行后自动恢复随机，流水会显示测试赢/测试输。</p>
+        </div>
+        <div class="cleanup-panel">
+          <h3>流水清理状态</h3>
+          <div class="cleanup-grid" id="cleanupStatus"></div>
+        </div>
+        <button class="secondary danger" id="clearOldLogs" style="width:100%;margin-top:12px;">清理 7 天前流水</button>
+      </section>
+      <section class="stack">
+        <div class="card">
+          <h2 style="font-size:18px;margin-bottom:12px;">用户列表</h2>
+          <div class="filters" style="grid-template-columns:1fr auto;">
+            <input id="userListFilter" placeholder="筛选用户名">
+            <button class="secondary" id="refreshUserList">刷新</button>
+          </div>
+          <div class="log-summary" id="userListSummary"></div>
+          <table>
+            <thead><tr><th>用户</th><th>余额</th><th>7天下注</th><th>净结果</th><th>操作</th></tr></thead>
+            <tbody id="userListTable"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h2 style="font-size:18px;margin-bottom:12px;">积分申请</h2>
+          <table>
+            <thead><tr><th>时间</th><th>用户</th><th>数量</th><th>操作</th></tr></thead>
+            <tbody id="requestTable"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h2 style="font-size:18px;margin-bottom:12px;">游戏胜率配置</h2>
+          <div class="rates" id="oddsConfig"></div>
+        </div>
+        <div class="card">
+          <h2 style="font-size:18px;margin-bottom:12px;">待结算赛事单</h2>
+          <div class="filters" style="grid-template-columns:1fr 1fr auto auto;">
+            <input id="pendingUserFilter" placeholder="按用户筛选">
+            <input id="pendingTextFilter" placeholder="按赛事 / 盘口筛选">
+            <button class="secondary" id="filterPendingSelected">选中用户</button>
+            <button class="secondary" id="exportPendingBets">导出CSV</button>
+          </div>
+          <div class="log-summary" id="pendingSummary"></div>
+          <table>
+            <thead><tr><th>时间</th><th>用户</th><th>赛事</th><th>下注</th><th>预计返还</th><th>操作</th></tr></thead>
+            <tbody id="pendingBets"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h2 style="font-size:18px;margin-bottom:12px;">全部流水</h2>
+          <div class="filters">
+            <input id="logUserFilter" placeholder="按用户筛选">
+            <input id="logTextFilter" placeholder="按游戏 / 赛事筛选">
+            <select id="logStatusFilter">
+              <option value="">全部状态</option>
+              <option value="赢">赢</option>
+              <option value="输">输</option>
+              <option value="发放">发放</option>
+              <option value="待结算">待结算</option>
+            </select>
+          </div>
+          <div class="quick-filters" id="logQuickFilters">
+            <button class="quick-filter active" data-log-quick="">全部</button>
+            <button class="quick-filter" data-log-quick="待结算">待结算</button>
+            <button class="quick-filter" data-log-quick="赢">赢</button>
+            <button class="quick-filter" data-log-quick="输">输</button>
+            <button class="quick-filter" data-log-quick="发放">发放</button>
+            <button class="quick-filter" data-log-quick="测试">测试</button>
+            <button class="quick-filter" id="exportLogs">导出CSV</button>
+          </div>
+          <div class="log-summary" id="logSummary"></div>
+          <div class="log-insights" id="logInsights"></div>
+          <table>
+            <thead><tr><th>时间</th><th>用户</th><th>项目</th><th>下注</th><th>结果</th></tr></thead>
+            <tbody id="adminLogs"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+  <div id="toast" class="toast"></div>
+  <script src="assets/win10bet-config.js"></script>
+  <script>
+    const STORE_KEY = "win10bet_state_v1";
+    const API_STORAGE_KEY = "win10bet_api_base";
+    const ADMIN_AUTH_KEY = "win10bet_admin_auth_v1";
+    const CONFIG = window.WIN10BET_CONFIG || {};
+    const urlParams = new URLSearchParams(location.search);
+    const normalizeApiBase = (value) => String(value || "").trim().replace(/\/+$/, "");
+    const rememberApiBase = (value) => {
+      const normalized = normalizeApiBase(value);
+      if (normalized) localStorage.setItem(API_STORAGE_KEY, normalized);
+      return normalized;
+    };
+    const queryApiBase = normalizeApiBase(urlParams.get("api"));
+    const API_BASE = queryApiBase
+      ? rememberApiBase(queryApiBase)
+      : normalizeApiBase(CONFIG.apiBase || localStorage.getItem(API_STORAGE_KEY));
+    const API_ENABLED = Boolean(API_BASE || location.protocol === "http:" || location.protocol === "https:");
+    let apiOnline = API_ENABLED;
+    let saveTimer = null;
+    const DAY = 24 * 60 * 60 * 1000;
+    const now = () => new Date().toISOString();
+    const fmt = value => Number(value || 0).toLocaleString("zh-CN");
+    const timeFmt = iso => new Date(iso).toLocaleString("zh-CN", { hour12: false });
+    const resolveApiUrl = (path) => /^https?:\/\//i.test(path) ? path : `${API_BASE}${path}`;
+    const defaultState = {
+      users: {},
+      currentUser: "",
+      requests: [],
+      logs: [],
+      openBets: [],
+      testOverrides: {},
+      odds: {
+        sports: 50,
+        blackjack: 49, baccarat: 48, niuniu: 48, dragon: 48, zhajinhua: 47, texas: 47, sangong: 48,
+        showhand: 46, paijiu: 47, teenpatti: 47, ander: 48,
+        thor: 44, fortune: 44, aztec: 44, "dragon-treasure": 44, "space-spin": 44, fruit: 45,
+        "candy-pop": 45, "gold-panther": 44, "neon-gate": 44,
+        runner: 48, mines: 48, plinko: 48, dice: 46, fish: 46, crashcar: 47,
+        roulette: 47, sicbo: 46, penalty: 48, duel: 48, derby: 47, hoops: 48,
+        darts: 48, bowling: 47, nineball: 47, boxing: 48, serve: 48, moto: 47, keeper: 48, "space-race": 47
+      }
+    };
+    let state = load();
+    let selectedUser = "";
+
+    function getStoredAdminAuth() {
+      try {
+        return JSON.parse(sessionStorage.getItem(ADMIN_AUTH_KEY) || "null");
+      } catch {
+        return null;
+      }
+    }
+
+    function setStoredAdminAuth(auth) {
+      if (!auth || !auth.user) {
+        sessionStorage.removeItem(ADMIN_AUTH_KEY);
+        return;
+      }
+      sessionStorage.setItem(ADMIN_AUTH_KEY, JSON.stringify(auth));
+    }
+
+    function promptForAdminAuth() {
+      const saved = getStoredAdminAuth() || {};
+      const user = window.prompt("请输入后台账号", saved.user || "win10bet-admin");
+      if (user === null) return null;
+      const pass = window.prompt("请输入后台密码", "");
+      if (pass === null) return null;
+      const auth = { user: user.trim(), pass };
+      setStoredAdminAuth(auth);
+      return auth;
+    }
+
+    function applyAdminAuth(headers, auth) {
+      if (!auth || !auth.user) return headers;
+      headers.Authorization = `Basic ${btoa(`${auth.user}:${auth.pass || ""}`)}`;
+      return headers;
+    }
+
+    function normalizeState(data = {}) {
+      data.logs = (data.logs || []).filter(log => Date.now() - new Date(log.time).getTime() <= 7 * DAY);
+      return {
+        ...defaultState,
+        ...data,
+        currentUser: "",
+        users: data.users || {},
+        requests: data.requests || [],
+        logs: data.logs || [],
+        openBets: data.openBets || [],
+        testOverrides: { ...(data.testOverrides || {}) },
+        odds: { ...defaultState.odds, ...(data.odds || {}) }
+      };
+    }
+
+    async function readApiPayload(response) {
+      const text = await response.text();
+      try {
+        return text ? JSON.parse(text) : {};
+      } catch {
+        return { message: text };
+      }
+    }
+
+    async function apiFetch(path, options = {}) {
+      if (!API_ENABLED) throw new Error("api offline");
+      const { adminAuth, ...fetchOptions } = options;
+      const makeHeaders = (auth) => applyAdminAuth({
+        "Content-Type": "application/json",
+        ...(fetchOptions.headers || {})
+      }, auth);
+      let response = await fetch(resolveApiUrl(path), {
+        ...fetchOptions,
+        headers: makeHeaders(adminAuth ? getStoredAdminAuth() : null)
+      });
+      if (response.status === 401 && adminAuth) {
+        const auth = promptForAdminAuth();
+        if (!auth) throw new Error("需要后台账号密码");
+        response = await fetch(resolveApiUrl(path), {
+          ...fetchOptions,
+          headers: makeHeaders(auth)
+        });
+      }
+      const data = await readApiPayload(response);
+      if (response.status === 401 && adminAuth) setStoredAdminAuth(null);
+      if (!response.ok || data.ok === false) throw new Error(data.message || "api error");
+      return data;
+    }
+
+    async function syncFromServer() {
+      if (!API_ENABLED) return false;
+      try {
+        const data = await apiFetch("/api/state");
+        state = normalizeState(data.state);
+        localStorage.setItem(STORE_KEY, JSON.stringify(state));
+        apiOnline = true;
+        return true;
+      } catch {
+        apiOnline = false;
+        return false;
+      }
+    }
+
+    function sharedSnapshot() {
+      return {
+        ...state,
+        currentUser: "",
+        users: { ...(state.users || {}) },
+        requests: state.requests || [],
+        logs: state.logs || [],
+        openBets: state.openBets || [],
+        testOverrides: state.testOverrides || {},
+        odds: { ...defaultState.odds, ...(state.odds || {}) }
+      };
+    }
+
+    function scheduleServerSave() {
+      if (!apiOnline) return;
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(async () => {
+        try {
+          await apiFetch("/api/state", {
+            method: "POST",
+            body: JSON.stringify({ state: sharedSnapshot() })
+          });
+          apiOnline = true;
+        } catch {
+          apiOnline = false;
+        }
+      }, 180);
+    }
+
+    function load() {
+      const raw = localStorage.getItem(STORE_KEY);
+      const data = raw ? JSON.parse(raw) : defaultState;
+      return normalizeState(data);
+    }
+    function save() {
+      state.logs = state.logs.filter(log => Date.now() - new Date(log.time).getTime() <= 7 * DAY);
+      localStorage.setItem(STORE_KEY, JSON.stringify(state));
+      scheduleServerSave();
+    }
+    function applyServerState(data) {
+      state = normalizeState(data.state || data);
+      localStorage.setItem(STORE_KEY, JSON.stringify(state));
+      apiOnline = true;
+      renderAll();
+    }
+    async function adminAction(path, body) {
+      if (!API_ENABLED) return false;
+      try {
+        const data = await apiFetch(path, {
+          method: "POST",
+          body: JSON.stringify(body || {}),
+          adminAuth: true
+        });
+        applyServerState(data);
+        return true;
+      } catch (error) {
+        apiOnline = false;
+        showToast(error.message || "服务器暂时不可用，已使用本机模式");
+        return false;
+      }
+    }
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(showToast.timer);
+      showToast.timer = setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+    function addLog(name, item, stake, result, status) {
+      state.logs.unshift({ time: now(), user: name, item, stake, result, status });
+      save();
+    }
+    function statusClass(status) {
+      if (/待结算/.test(status)) return "status-pending";
+      if (/赢|发放|注册/.test(status)) return "status-win";
+      if (/输/.test(status)) return "status-lose";
+      return "";
+    }
+    function userActivitySummary(logs, pending) {
+      const sports = logs.filter(log => /世界杯|NBA|赛事|FIFA|Pro League|Masters|Cup/.test(log.item)).length + pending.length;
+      const games = logs.filter(log => /游戏局|飞行|地雷|弹珠|捕鱼|老虎机/.test(log.item)).length;
+      const points = logs.filter(log => /积分|发放|申请|注册/.test(log.item)).length;
+      const topType = [
+        ["游戏", games],
+        ["赛事", sports],
+        ["积分", points]
+      ].sort((a, b) => b[1] - a[1])[0];
+      const recentStake = logs.find(log => Number(log.stake || 0) > 0);
+      const pendingStake = pending.reduce((sum, bet) => sum + Number(bet.stake || 0), 0);
+      const pendingPayout = pending.reduce((sum, bet) => sum + Number(bet.payout || 0), 0);
+      return {
+        type: topType && topType[1] ? topType[0] : "暂无",
+        recent: recentStake ? timeFmt(recentStake.time) : "暂无下注",
+        pendingStake,
+        pendingPayout
+      };
+    }
+    function renderStats() {
+      const users = Object.values(state.users || {});
+      const totalBalance = users.reduce((sum, item) => sum + Number(item.balance || 0), 0);
+      const today = state.logs.filter(log => Date.now() - new Date(log.time).getTime() <= DAY);
+      const staked = today.reduce((sum, log) => sum + Number(log.stake || 0), 0);
+      const cards = [
+        ["注册用户", users.length],
+        ["总积分余额", fmt(totalBalance)],
+        ["待发放申请", state.requests.length],
+        ["待结算赛事", (state.openBets || []).length],
+        ["今日流水下注", fmt(staked)],
+        ["7天流水条数", state.logs.length],
+        ["测试账号", Object.keys(state.testOverrides || {}).length],
+        ["当前后台", "独立页面"]
+      ];
+      document.getElementById("adminStats").innerHTML = cards.map(([label, value]) => `<div class="stat-card"><span>${label}</span><strong>${value}</strong></div>`).join("");
+    }
+    function renderOpsMonitor() {
+      const box = document.getElementById("opsMonitor");
+      if (!box) return;
+      const pending = state.openBets || [];
+      const logs = state.logs || [];
+      const today = logs.filter(log => Date.now() - new Date(log.time).getTime() <= DAY);
+      const gameLogs = today.filter(log => /游戏局|飞行|地雷|弹珠|捕鱼|老虎机/.test(log.item || ""));
+      const sportsLogs = today.filter(log => /世界杯|NBA|赛事|FIFA|Pro League|Masters|Cup/.test(log.item || ""));
+      const riskUsers = Object.keys(state.users || {}).filter(name => {
+        const userPending = pending.filter(bet => bet.user === name);
+        const locked = userPending.reduce((sum, bet) => sum + Number(bet.stake || 0), 0);
+        return userPending.length >= 3 || locked >= 100000;
+      });
+      const pendingStake = pending.reduce((sum, bet) => sum + Number(bet.stake || 0), 0);
+      const pendingPayout = pending.reduce((sum, bet) => sum + Number(bet.payout || 0), 0);
+      const requestTotal = (state.requests || []).reduce((sum, req) => sum + Number(req.amount || 0), 0);
+      const topGame = gameLogs.reduce((map, log) => {
+        const key = String(log.item || "游戏").split(" ")[0];
+        map[key] = (map[key] || 0) + 1;
+        return map;
+      }, {});
+      const hotGame = Object.entries(topGame).sort((a, b) => b[1] - a[1])[0];
+      box.innerHTML = `
+        <div class="ops-card">
+          <h3>待结算监控</h3>
+          <div class="ops-metrics"><span>锁定下注<strong>${fmt(pendingStake)}</strong></span><span>最高待返<strong>${fmt(pendingPayout)}</strong></span><span>赛事单<strong>${pending.length}</strong></span><span>风险用户<strong>${riskUsers.length}</strong></span></div>
+          <p>世界杯 / NBA 投注单在这里锁定，完场后手动或自动结算。</p>
+        </div>
+        <div class="ops-card">
+          <h3>今日玩法热度</h3>
+          <div class="ops-metrics"><span>游戏流水<strong>${gameLogs.length}</strong></span><span>赛事流水<strong>${sportsLogs.length}</strong></span><span>热门游戏<strong>${hotGame ? hotGame[0] : "暂无"}</strong></span><span>今日下注<strong>${fmt(today.reduce((sum, log) => sum + Number(log.stake || 0), 0))}</strong></span></div>
+          <p>用于观察牌桌、老虎机和体育娱乐是否都在写入流水。</p>
+        </div>
+        <div class="ops-card">
+          <h3>积分申请队列</h3>
+          <div class="ops-metrics"><span>待审核<strong>${(state.requests || []).length}</strong></span><span>申请总额<strong>${fmt(requestTotal)}</strong></span><span>用户数<strong>${Object.keys(state.users || {}).length}</strong></span><span>测试号<strong>${Object.keys(state.testOverrides || {}).length}</strong></span></div>
+          <p>前台注册为 0 分，用户申请后由这里审核发放。</p>
+        </div>
+      `;
+    }
+
+    function renderCleanupStatus() {
+      const box = document.getElementById("cleanupStatus");
+      if (!box) return;
+      const cutoff = Date.now() - 7 * DAY;
+      const allLogs = state.logs || [];
+      const expired = allLogs.filter(log => new Date(log.time).getTime() < cutoff).length;
+      const earliest = allLogs.reduce((min, log) => {
+        const t = new Date(log.time).getTime();
+        return Number.isFinite(t) && (!min || t < min) ? t : min;
+      }, 0);
+      const nextClean = new Date(Date.now() + DAY).toLocaleDateString("zh-CN");
+      box.innerHTML = `
+        <div><span>保留规则</span><strong>最近 7 天</strong></div>
+        <div><span>当前流水</span><strong>${allLogs.length} 条</strong></div>
+        <div><span>可清理</span><strong>${expired} 条</strong></div>
+        <div><span>最早流水</span><strong>${earliest ? timeFmt(new Date(earliest).toISOString()) : "暂无"}</strong></div>
+        <div><span>建议下次检查</span><strong>${nextClean}</strong></div>
+        <div><span>清理方式</span><strong>按钮手动 / 保存自动</strong></div>
+      `;
+    }
+    function renderUser() {
+      const box = document.getElementById("adminUserBox");
+      const found = selectedUser && state.users[selectedUser];
+      const userLogs = found ? state.logs.filter(log => log.user === selectedUser) : [];
+      const totalStake = userLogs.reduce((sum, log) => sum + Number(log.stake || 0), 0);
+      const netResult = userLogs.reduce((sum, log) => sum + Number(log.result || 0), 0);
+      const userPending = found ? (state.openBets || []).filter(bet => bet.user === selectedUser) : [];
+      const pendingCount = userPending.length;
+      const requestCount = found ? (state.requests || []).filter(req => req.user === selectedUser).length : 0;
+      const recentLogs = userLogs.slice(0, 5);
+      const activity = found ? userActivitySummary(userLogs, userPending) : null;
+      box.innerHTML = found ? `
+        <div class="row"><span>用户名</span><strong>${selectedUser}</strong></div>
+        <div class="row"><span>积分</span><strong>${fmt(state.users[selectedUser].balance)}</strong></div>
+        <div class="row"><span>下一局测试</span><strong>${state.testOverrides[selectedUser] && state.testOverrides[selectedUser] !== "random" ? (state.testOverrides[selectedUser] === "win" ? "赢" : "输") : "随机"}</strong></div>
+        <div class="row"><span>注册时间</span><span class="muted">${timeFmt(state.users[selectedUser].createdAt)}</span></div>
+        <div class="row"><span>7天下注</span><strong>${fmt(totalStake)}</strong></div>
+        <div class="row"><span>7天净结果</span><strong class="${netResult >= 0 ? "status-win" : "status-lose"}">${netResult >= 0 ? "+" : ""}${fmt(netResult)}</strong></div>
+        <div class="row"><span>待结算赛事</span><strong>${pendingCount}</strong></div>
+        <div class="row"><span>待审核申请</span><strong>${requestCount}</strong></div>
+        <div class="user-alerts">
+          <div class="user-alert"><span>主要行为</span><strong>${activity.type}</strong></div>
+          <div class="user-alert"><span>最近下注</span><strong>${activity.recent}</strong></div>
+          <div class="user-alert"><span>锁定下注</span><strong>${fmt(activity.pendingStake)}</strong></div>
+          <div class="user-alert"><span>最高待返</span><strong>${fmt(activity.pendingPayout)}</strong></div>
+        </div>
+        <div class="user-actions">
+          <button class="secondary" id="filterSelectedUser">查流水</button>
+          <button class="secondary" id="filterPendingSelected">查待结算</button>
+          <button class="secondary" id="copySelectedUser">复制名字</button>
+        </div>
+        <div class="user-mini">
+          <div>
+            <h3>该用户待结算</h3>
+            ${userPending.slice(0, 5).map(bet => `
+              <div class="user-mini-row">
+                <span>${bet.item}<br><span class="muted">${timeFmt(bet.time)} · x${bet.odd}</span></span>
+                <strong>${fmt(bet.stake)} / ${fmt(bet.payout)}</strong>
+              </div>
+            `).join("") || `<div class="user-mini-row"><span class="muted">暂无待结算赛事单</span><strong>-</strong></div>`}
+          </div>
+          <div>
+            <h3>最近流水</h3>
+            ${recentLogs.map(log => `
+              <div class="user-mini-row">
+                <span>${log.item}<br><span class="muted">${timeFmt(log.time)} · ${log.status}</span></span>
+                <strong class="${statusClass(log.status)}">${log.result > 0 ? "+" : ""}${fmt(log.result)}</strong>
+              </div>
+            `).join("") || `<div class="user-mini-row"><span class="muted">暂无流水</span><strong>-</strong></div>`}
+          </div>
+        </div>
+      ` : `<p class="muted">还没有选中用户</p>`;
+      document.getElementById("forcedResult").value = found ? (state.testOverrides[selectedUser] || "random") : "random";
+    }
+    function userRows() {
+      const filter = document.getElementById("userListFilter")?.value.trim().toLowerCase() || "";
+      return Object.entries(state.users || {}).map(([name, account]) => {
+        const logs = state.logs.filter(log => log.user === name);
+        const stake = logs.reduce((sum, log) => sum + Number(log.stake || 0), 0);
+        const net = logs.reduce((sum, log) => sum + Number(log.result || 0), 0);
+        const pending = (state.openBets || []).filter(bet => bet.user === name).length;
+        return { name, account, stake, net, pending, logs: logs.length };
+      }).filter(row => !filter || row.name.toLowerCase().includes(filter))
+        .sort((a, b) => b.stake - a.stake || b.account.balance - a.account.balance);
+    }
+    function renderUserList() {
+      const rows = userRows();
+      const totalBalance = rows.reduce((sum, row) => sum + Number(row.account.balance || 0), 0);
+      const totalStake = rows.reduce((sum, row) => sum + row.stake, 0);
+      const totalPending = rows.reduce((sum, row) => sum + row.pending, 0);
+      document.getElementById("userListSummary").innerHTML = `
+        <div><span>筛选用户</span><strong>${rows.length}</strong></div>
+        <div><span>筛选余额</span><strong>${fmt(totalBalance)}</strong></div>
+        <div><span>筛选下注</span><strong>${fmt(totalStake)}</strong></div>
+        <div><span>待结算</span><strong>${totalPending}</strong></div>
+      `;
+      document.getElementById("userListTable").innerHTML = rows.length ? rows.slice(0, 80).map(row => `
+        <tr>
+          <td>${row.name}<br><span class="muted">${timeFmt(row.account.createdAt)} · ${row.logs} 条</span></td>
+          <td>${fmt(row.account.balance)}</td>
+          <td>${fmt(row.stake)}<br><span class="muted">待结算 ${row.pending}</span></td>
+          <td><span class="${row.net >= 0 ? "status-win" : "status-lose"}">${row.net >= 0 ? "+" : ""}${fmt(row.net)}</span></td>
+          <td><button class="secondary" data-select-user="${row.name}">选中</button></td>
+        </tr>
+      `).join("") : `<tr><td colspan="5" class="muted">没有找到用户</td></tr>`;
+    }
+    function renderRequests() {
+      document.getElementById("requestTable").innerHTML = state.requests.length ? state.requests.map(req => `
+        <tr><td>${timeFmt(req.time)}</td><td>${req.user}</td><td>${fmt(req.amount)}</td><td><button class="secondary" data-approve="${req.id}">发放</button></td></tr>
+      `).join("") : `<tr><td colspan="4" class="muted">暂无申请</td></tr>`;
+    }
+    function renderOdds() {
+      const groups = [
+        ["体育赛事", { sports: "体育赛事" }],
+        ["牌桌", { blackjack: "21点", baccarat: "百家乐", niuniu: "牛牛", dragon: "龙虎", zhajinhua: "炸金花", texas: "德州", sangong: "三公", showhand: "梭哈", paijiu: "牌九", teenpatti: "印度三张", ander: "安达巴哈" }],
+        ["老虎机", { thor: "雷神", fortune: "财神到", aztec: "阿兹特克", "dragon-treasure": "龙宝藏", "space-spin": "星际转轴", fruit: "水果机", "candy-pop": "糖果爆分", "gold-panther": "金豹宝藏", "neon-gate": "霓虹星门" }],
+        ["创新", { runner: "爆点飞行", mines: "宝石地雷", plinko: "弹珠倍率", dice: "幸运骰子" }],
+        ["街机", { fish: "深海捕鱼", crashcar: "赛车冲刺", roulette: "轮盘", sicbo: "骰宝", derby: "霓虹赛马", nineball: "九球对决", boxing: "拳王擂台", moto: "摩托冲刺", "space-race": "太空竞速" }],
+        ["体育娱乐", { penalty: "点球大战", hoops: "三分挑战", darts: "飞镖靶心", bowling: "保龄全倒", serve: "网球发球", keeper: "守门员挑战" }],
+        ["电竞娱乐", { duel: "电竞对枪" }]
+      ];
+      document.getElementById("oddsConfig").innerHTML = groups.map(([title, labels]) => {
+        const keys = Object.keys(labels);
+        return `
+          <div class="rate-group">
+            <div class="rate-group-head"><strong>${title}</strong><span>${keys.length} 项配置</span></div>
+            <div class="rate-grid">${keys.map(key => `
+              <div class="panel">
+                <div class="field">
+                  <label>${labels[key]}胜率 %</label>
+                  <input type="number" min="1" max="95" value="${state.odds[key]}" data-rate="${key}">
+                </div>
+                <p class="muted">当前 ${state.odds[key]}%</p>
+              </div>
+            `).join("")}</div>
+          </div>
+        `;
+      }).join("");
+    }
+    function filteredPendingBets() {
+      const userFilter = document.getElementById("pendingUserFilter")?.value.trim().toLowerCase() || "";
+      const textFilter = document.getElementById("pendingTextFilter")?.value.trim().toLowerCase() || "";
+      const rows = (state.openBets || []).filter(bet => {
+        const userOk = !userFilter || String(bet.user || "").toLowerCase().includes(userFilter);
+        const textOk = !textFilter || `${bet.item || ""} ${bet.pick || ""}`.toLowerCase().includes(textFilter);
+        return userOk && textOk;
+      }).slice(0, 80);
+      return { rows, userFilter, textFilter };
+    }
+    function renderPendingBets() {
+      const { rows, userFilter, textFilter } = filteredPendingBets();
+      const stakeTotal = rows.reduce((sum, bet) => sum + Number(bet.stake || 0), 0);
+      const payoutTotal = rows.reduce((sum, bet) => sum + Number(bet.payout || 0), 0);
+      document.getElementById("pendingSummary").innerHTML = `
+        <div><span>${userFilter || textFilter ? "筛选待结算" : "待结算单"}</span><strong>${rows.length}</strong></div>
+        <div><span>筛选下注</span><strong>${fmt(stakeTotal)}</strong></div>
+        <div><span>筛选预返</span><strong>${fmt(payoutTotal)}</strong></div>
+      `;
+      document.getElementById("pendingBets").innerHTML = rows.length ? rows.map(bet => `
+        <tr>
+          <td>${timeFmt(bet.time)}</td>
+          <td>${bet.user}</td>
+          <td>${bet.item}<br><span class="muted">赔率 x${bet.odd}</span><span class="pending-detail"><span>潜在盈利 <strong>${fmt(Math.max(0, Number(bet.payout || 0) - Number(bet.stake || 0)))}</strong></span><span>余额 ${fmt(state.users?.[bet.user]?.balance || 0)}</span></span></td>
+          <td>${fmt(bet.stake)}</td>
+          <td><span class="status-pending">${fmt(bet.payout)}</span></td>
+          <td>
+            <button class="secondary" data-settle-bet="${bet.id}" data-settle-result="win">赢</button>
+            <button class="secondary danger" data-settle-bet="${bet.id}" data-settle-result="lose">输</button>
+            <button class="secondary ghost" data-settle-bet="${bet.id}" data-settle-result="void">作废</button>
+          </td>
+        </tr>
+      `).join("") : `<tr><td colspan="6" class="muted">暂无待结算赛事单</td></tr>`;
+    }
+    function filteredLogs() {
+      const userFilter = document.getElementById("logUserFilter")?.value.trim().toLowerCase() || "";
+      const textFilter = document.getElementById("logTextFilter")?.value.trim().toLowerCase() || "";
+      const statusFilter = document.getElementById("logStatusFilter")?.value || "";
+      const rows = state.logs.filter(log => {
+        const userOk = !userFilter || String(log.user || "").toLowerCase().includes(userFilter);
+        const textOk = !textFilter || String(log.item || "").toLowerCase().includes(textFilter);
+        const statusOk = !statusFilter || String(log.status || "").includes(statusFilter);
+        return userOk && textOk && statusOk;
+      });
+      return { rows, userFilter, textFilter, statusFilter };
+    }
+    function renderLogs() {
+      const { rows, textFilter, statusFilter } = filteredLogs();
+      document.querySelectorAll("[data-log-quick]").forEach(button => {
+        const value = button.dataset.logQuick || "";
+        const active = value === "测试" ? textFilter === "测试" : value === "" ? !statusFilter && !textFilter : value === statusFilter && textFilter !== "测试";
+        button.classList.toggle("active", active);
+      });
+      const stakeTotal = rows.reduce((sum, log) => sum + Number(log.stake || 0), 0);
+      const resultTotal = rows.reduce((sum, log) => sum + Number(log.result || 0), 0);
+      document.getElementById("logSummary").innerHTML = `
+        <div><span>筛选流水</span><strong>${rows.length}</strong></div>
+        <div><span>筛选下注</span><strong>${fmt(stakeTotal)}</strong></div>
+        <div><span>筛选净结果</span><strong class="${resultTotal >= 0 ? "status-win" : "status-lose"}">${resultTotal >= 0 ? "+" : ""}${fmt(resultTotal)}</strong></div>
+      `;
+      renderLogInsights(rows);
+      document.getElementById("adminLogs").innerHTML = rows.length ? rows.map(log => `
+        <tr><td>${timeFmt(log.time)}</td><td>${log.user}</td><td>${log.item}</td><td>${fmt(log.stake)}</td><td><span class="${statusClass(log.status)}">${log.status}</span> ${log.result > 0 ? "+" : ""}${fmt(log.result)}</td></tr>
+      `).join("") : `<tr><td colspan="5" class="muted">暂无流水</td></tr>`;
+    }
+    function logKind(item) {
+      if (/世界杯|NBA|赛事|FIFA|Pro League|Masters|Cup/.test(item)) return "赛事";
+      if (/后台|积分|发放|申请|注册/.test(item)) return "积分";
+      if (/雷神|老虎机|财神|宝藏|星际|水果|糖果|金豹|星门/.test(item)) return "老虎机";
+      if (/百家乐|21点|牛牛|龙虎|炸金花|德州|牌九|三公|梭哈|安达/.test(item)) return "牌桌";
+      return "游戏";
+    }
+    function renderLogInsights(rows) {
+      const box = document.getElementById("logInsights");
+      if (!box) return;
+      const withStake = rows.filter(log => Number(log.stake || 0) > 0);
+      const kindCounts = rows.reduce((map, log) => {
+        const kind = logKind(log.item || "");
+        map[kind] = (map[kind] || 0) + 1;
+        return map;
+      }, {});
+      const topKind = Object.entries(kindCounts).sort((a, b) => b[1] - a[1])[0];
+      const latest = withStake[0] || rows[0];
+      const maxStake = withStake.reduce((max, log) => Number(log.stake || 0) > Number(max?.stake || 0) ? log : max, null);
+      const won = rows.filter(log => /赢|发放|测试赢/.test(log.status || "") || Number(log.result || 0) > 0).length;
+      const winRate = rows.length ? Math.round(won / rows.length * 100) + "%" : "-";
+      box.innerHTML = `
+        <div class="log-insight"><span>主要类型</span><strong>${topKind ? `${topKind[0]} ${topKind[1]}条` : "-"}</strong></div>
+        <div class="log-insight"><span>最近下注</span><strong>${latest ? timeFmt(latest.time) : "-"}</strong></div>
+        <div class="log-insight"><span>最高下注</span><strong>${maxStake ? `${fmt(maxStake.stake)} · ${maxStake.user}` : "-"}</strong></div>
+        <div class="log-insight"><span>赢单比例</span><strong>${winRate}</strong></div>
+      `;
+    }
+    function csvCell(value) {
+      const text = String(value ?? "");
+      return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    }
+    function exportLogsCsv() {
+      const { rows } = filteredLogs();
+      const header = ["时间", "用户", "项目", "下注", "结果", "状态"];
+      const lines = [header, ...rows.map(log => [
+        timeFmt(log.time),
+        log.user,
+        log.item,
+        Number(log.stake || 0),
+        Number(log.result || 0),
+        log.status
+      ])].map(row => row.map(csvCell).join(","));
+      const blob = new Blob(["\ufeff" + lines.join("\n")], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `win10bet-logs-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      showToast(`已导出 ${rows.length} 条流水`);
+    }
+    function exportPendingBetsCsv() {
+      const { rows } = filteredPendingBets();
+      const header = ["时间", "用户", "赛事", "选择", "赔率", "下注", "预计返还", "状态"];
+      const lines = [header, ...rows.map(bet => [
+        timeFmt(bet.time),
+        bet.user,
+        bet.item,
+        bet.pick || "",
+        bet.odd,
+        Number(bet.stake || 0),
+        Number(bet.payout || 0),
+        bet.status
+      ])].map(row => row.map(csvCell).join(","));
+      const blob = new Blob(["\ufeff" + lines.join("\n")], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `win10bet-pending-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      showToast(`已导出 ${rows.length} 条待结算单`);
+    }
+    function renderAll() {
+      renderStats();
+      renderOpsMonitor();
+      renderCleanupStatus();
+      renderUser();
+      renderUserList();
+      renderRequests();
+      renderOdds();
+      renderPendingBets();
+      renderLogs();
+    }
+    async function approveRequest(id) {
+      if (await adminAction("/api/admin/approve-request", { id })) return;
+      const req = state.requests.find(item => item.id === id);
+      if (!req || !state.users[req.user]) return;
+      state.users[req.user].balance += Number(req.amount);
+      addLog(req.user, "后台发放积分", 0, Number(req.amount), "发放");
+      state.requests = state.requests.filter(item => item.id !== id);
+      save();
+      renderAll();
+    }
+    async function settlePendingBet(id, resultType) {
+      if (await adminAction("/api/admin/settle-bet", { id, resultType })) {
+        showToast("赛事单已从共享后台结算");
+        return;
+      }
+      const bet = (state.openBets || []).find(item => item.id === id);
+      if (!bet) return showToast("找不到这张待结算单");
+      const account = state.users[bet.user];
+      if (!account) return showToast("找不到下注用户");
+      let result = 0;
+      let status = "输";
+      if (resultType === "win") {
+        result = Number(bet.payout || 0);
+        account.balance += result;
+        status = "后台结算赢";
+      } else if (resultType === "void") {
+        result = Number(bet.stake || 0);
+        account.balance += result;
+        status = "后台作废退回";
+      } else {
+        status = "后台结算输";
+      }
+      state.openBets = (state.openBets || []).filter(item => item.id !== id);
+      addLog(bet.user, `${bet.item} ${status}`, Number(bet.stake || 0), result, status);
+      save();
+      renderAll();
+      showToast(`${bet.user} 的赛事单已${resultType === "win" ? "结算赢" : resultType === "void" ? "作废退回" : "结算输"}`);
+    }
+
+    document.addEventListener("click", async event => {
+      const target = event.target.closest("button");
+      if (!target) return;
+      if (target.id === "backToSite") window.location.href = "win10bet.html";
+      if (target.id === "findUser") {
+        const name = document.getElementById("adminSearch").value.trim();
+        selectedUser = state.users[name] ? name : "";
+        renderUser();
+        if (!selectedUser) showToast("找不到这个用户");
+      }
+      if (target.dataset.selectUser) {
+        selectedUser = target.dataset.selectUser;
+        document.getElementById("adminSearch").value = selectedUser;
+        renderUser();
+        document.getElementById("adminUserBox")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        showToast(`已选中 ${selectedUser}`);
+      }
+      if (target.id === "refreshUserList") renderUserList();
+      if (target.id === "filterSelectedUser") {
+        if (!selectedUser) return showToast("请先查找用户");
+        document.getElementById("logUserFilter").value = selectedUser;
+        renderLogs();
+        document.getElementById("adminLogs")?.closest(".card")?.scrollIntoView({ behavior: "smooth", block: "start" });
+        showToast(`已筛选 ${selectedUser} 的流水`);
+      }
+      if (target.id === "filterPendingSelected") {
+        if (!selectedUser) return showToast("请先查找用户");
+        document.getElementById("pendingUserFilter").value = selectedUser;
+        renderPendingBets();
+        showToast(`已筛选 ${selectedUser} 的待结算单`);
+      }
+      if (target.id === "copySelectedUser") {
+        if (!selectedUser) return showToast("请先查找用户");
+        document.getElementById("adminSearch").value = selectedUser;
+        navigator.clipboard?.writeText(selectedUser).catch(() => {});
+        showToast(`已复制/填入 ${selectedUser}`);
+      }
+      if (target.dataset.logQuick !== undefined) {
+        const value = target.dataset.logQuick;
+        document.getElementById("logStatusFilter").value = ["赢", "输", "发放", "待结算"].includes(value) ? value : "";
+        document.getElementById("logTextFilter").value = value === "测试" ? "测试" : "";
+        renderLogs();
+      }
+      if (target.id === "exportLogs") exportLogsCsv();
+      if (target.id === "exportPendingBets") exportPendingBetsCsv();
+      if (target.id === "grantPoints") {
+        const amount = Number(document.getElementById("grantAmount").value);
+        if (!selectedUser || !state.users[selectedUser]) return showToast("请先查找用户");
+        if (!amount || amount < 1) return showToast("请输入发放数量");
+        if (await adminAction("/api/admin/grant", { user: selectedUser, amount })) {
+          showToast("共享后台已发放积分");
+          return;
+        }
+        state.users[selectedUser].balance += amount;
+        addLog(selectedUser, "后台手动加积分", 0, amount, "发放");
+        save();
+        renderAll();
+      }
+      if (target.id === "setForcedResult") {
+        if (!selectedUser || !state.users[selectedUser]) return showToast("请先查找用户");
+        const value = document.getElementById("forcedResult").value;
+        if (await adminAction("/api/admin/forced-result", { user: selectedUser, value })) {
+          showToast("共享后台已保存测试结果");
+          return;
+        }
+        if (value === "random") delete state.testOverrides[selectedUser];
+        else state.testOverrides[selectedUser] = value;
+        save();
+        renderAll();
+      }
+      if (target.id === "clearOldLogs") {
+        if (await adminAction("/api/admin/clear-logs", {})) {
+          showToast("共享后台已清理 7 天前流水");
+          return;
+        }
+        state.logs = state.logs.filter(log => Date.now() - new Date(log.time).getTime() <= 7 * DAY);
+        save();
+        renderAll();
+        showToast("已清理 7 天前流水");
+      }
+      if (target.dataset.approve) await approveRequest(target.dataset.approve);
+      if (target.dataset.settleBet) await settlePendingBet(target.dataset.settleBet, target.dataset.settleResult);
+    });
+
+    document.addEventListener("change", event => {
+      const input = event.target.closest("[data-rate]");
+      if (!input) {
+        if (event.target && event.target.id === "logStatusFilter") renderLogs();
+        return;
+      }
+      const value = Math.max(1, Math.min(95, Number(input.value) || 1));
+      state.odds[input.dataset.rate] = value;
+      save();
+      renderOdds();
+    });
+
+    document.addEventListener("input", event => {
+      if (event.target && (event.target.id === "logUserFilter" || event.target.id === "logTextFilter")) renderLogs();
+      if (event.target && (event.target.id === "pendingUserFilter" || event.target.id === "pendingTextFilter")) renderPendingBets();
+      if (event.target && event.target.id === "userListFilter") renderUserList();
+    });
+
+    async function refreshSharedData(silent = false) {
+      const ok = await syncFromServer();
+      if (ok) {
+        renderAll();
+        if (!silent) showToast("已刷新共享数据");
+      }
+    }
+
+    async function initAdmin() {
+      await refreshSharedData(true);
+      renderAll();
+      if (API_ENABLED) {
+        setInterval(() => refreshSharedData(true), 8000);
+      }
+    }
+
+    initAdmin();
+  </script>
+</body>
+</html>

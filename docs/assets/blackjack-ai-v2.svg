@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#071018"/>
+      <stop offset=".48" stop-color="#18304d"/>
+      <stop offset="1" stop-color="#2b1024"/>
+    </linearGradient>
+    <radialGradient id="glow" cx=".5" cy=".38" r=".58">
+      <stop offset="0" stop-color="#2ee6ff" stop-opacity=".5"/>
+      <stop offset=".48" stop-color="#ff2f7d" stop-opacity=".16"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="20" stdDeviation="18" flood-opacity=".38"/></filter>
+  </defs>
+  <rect width="1200" height="520" fill="url(#bg)"/>
+  <rect width="1200" height="520" fill="url(#glow)"/>
+  <ellipse cx="600" cy="386" rx="390" ry="104" fill="#083b32" stroke="#38e1af" stroke-opacity=".42" stroke-width="7"/>
+  <g filter="url(#shadow)">
+    <rect x="438" y="112" width="126" height="184" rx="18" fill="#f7fbff" transform="rotate(-10 501 204)"/>
+    <rect x="546" y="100" width="126" height="184" rx="18" fill="#fff6d8" transform="rotate(8 609 192)"/>
+    <circle cx="602" cy="328" r="54" fill="#111827"/>
+    <rect x="556" y="292" width="92" height="74" rx="24" fill="#1f78ff"/>
+  </g>
+  <text x="478" y="222" font-family="Arial, sans-serif" font-size="76" font-weight="900" fill="#ff2f7d">A</text>
+  <text x="586" y="210" font-family="Arial, sans-serif" font-size="72" font-weight="900" fill="#101722">K</text>
+  <g font-family="Arial, sans-serif" font-weight="900" fill="#fff">
+    <text x="72" y="126" font-size="48">BLACKJACK 21</text>
+    <text x="72" y="178" font-size="25" opacity=".84">AI DEALER · HIT OR STAND</text>
+  </g>
+</svg>

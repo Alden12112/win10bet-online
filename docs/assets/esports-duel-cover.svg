@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1">
+      <stop stop-color="#101827"/>
+      <stop offset=".5" stop-color="#26235c"/>
+      <stop offset="1" stop-color="#161d2d"/>
+    </linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="640" height="360" fill="url(#bg)"/>
+  <path d="M0 286h640" stroke="#ffffff" stroke-opacity=".14" stroke-width="4"/>
+  <path d="M40 310h560" stroke="#19d3ff" stroke-opacity=".34" stroke-width="2"/>
+  <g filter="url(#glow)">
+    <path d="M115 95h150l48 78-58 92H108l-52-85z" fill="#1f78ff" fill-opacity=".34" stroke="#24d6ff" stroke-width="5"/>
+    <path d="M525 95H375l-48 78 58 92h147l52-85z" fill="#ff3d7f" fill-opacity=".34" stroke="#ff8ab1" stroke-width="5"/>
+    <path d="M178 165h86l-28 20 28 20h-86z" fill="#d8f8ff"/>
+    <path d="M462 165h-86l28 20-28 20h86z" fill="#ffe1e6"/>
+    <text x="320" y="198" text-anchor="middle" font-family="Arial, sans-serif" font-size="52" font-weight="900" fill="#fff">VS</text>
+  </g>
+  <circle cx="188" cy="78" r="46" fill="#24d6ff" fill-opacity=".22"/>
+  <circle cx="452" cy="78" r="46" fill="#ff3d7f" fill-opacity=".22"/>
+</svg>

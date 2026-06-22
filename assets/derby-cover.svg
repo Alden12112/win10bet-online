@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <defs>
+    <linearGradient id="track" x1="0" x2="1" y1="0" y2="1">
+      <stop stop-color="#fff1bf"/>
+      <stop offset=".45" stop-color="#eeb44a"/>
+      <stop offset="1" stop-color="#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="night" x1="0" x2="0" y1="0" y2="1">
+      <stop stop-color="#111827"/>
+      <stop offset="1" stop-color="#312e81"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#night)"/>
+  <ellipse cx="320" cy="294" rx="330" ry="116" fill="url(#track)"/>
+  <ellipse cx="320" cy="294" rx="238" ry="72" fill="#111827" opacity=".78"/>
+  <path d="M0 292h640M0 330h640M78 248c122 28 378 28 500 0" stroke="#fff" stroke-opacity=".42" stroke-width="4" fill="none"/>
+  <g transform="translate(120 162)">
+    <path d="M34 76c40-54 106-48 152-14l42-16 18 24-44 28c-42 28-122 30-188 10z" fill="#ff3d7f"/>
+    <circle cx="54" cy="118" r="14" fill="#111827"/><circle cx="176" cy="118" r="14" fill="#111827"/>
+    <path d="M102 38 138 6l38 46" stroke="#fff" stroke-width="10" stroke-linecap="round" fill="none"/>
+  </g>
+  <g transform="translate(318 122) scale(1.05)">
+    <path d="M34 76c40-54 106-48 152-14l42-16 18 24-44 28c-42 28-122 30-188 10z" fill="#ffcf4a"/>
+    <circle cx="54" cy="118" r="14" fill="#111827"/><circle cx="176" cy="118" r="14" fill="#111827"/>
+    <path d="M102 38 138 6l38 46" stroke="#fff" stroke-width="10" stroke-linecap="round" fill="none"/>
+  </g>
+</svg>

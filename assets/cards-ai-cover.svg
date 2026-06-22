@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420">
+  <rect width="900" height="420" fill="#10213f"/>
+  <circle cx="690" cy="110" r="180" fill="#1f78ff" opacity=".22"/>
+  <circle cx="750" cy="250" r="120" fill="#ffcf4a" opacity=".18"/>
+  <g transform="translate(135 80)">
+    <rect width="160" height="230" rx="20" fill="#fff8e6" stroke="#d7b45a" stroke-width="8"/>
+    <text x="28" y="64" font-family="Arial" font-size="48" font-weight="900" fill="#c5232d">Q</text>
+    <text x="58" y="142" font-family="Arial" font-size="76" font-weight="900" fill="#c5232d">♦</text>
+  </g>
+  <g transform="translate(290 102) rotate(7)">
+    <rect width="160" height="230" rx="20" fill="#f8fbff" stroke="#1f78ff" stroke-width="8"/>
+    <text x="28" y="64" font-family="Arial" font-size="48" font-weight="900" fill="#17232b">J</text>
+    <text x="58" y="142" font-family="Arial" font-size="76" font-weight="900" fill="#17232b">♣</text>
+  </g>
+  <text x="520" y="165" font-family="Arial" font-size="70" font-weight="900" fill="#fff">BLACKJACK</text>
+  <text x="524" y="212" font-family="Arial" font-size="25" font-weight="800" fill="#ffcf4a">AI DEALER TABLE</text>
+</svg>

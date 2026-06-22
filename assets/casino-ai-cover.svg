@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#071b3a"/>
+      <stop offset=".55" stop-color="#0e55b8"/>
+      <stop offset="1" stop-color="#16b56f"/>
+    </linearGradient>
+    <filter id="s"><feDropShadow dx="0" dy="16" stdDeviation="14" flood-opacity=".32"/></filter>
+  </defs>
+  <rect width="900" height="420" fill="url(#bg)"/>
+  <circle cx="710" cy="110" r="160" fill="#fff" opacity=".10"/>
+  <g opacity=".18" stroke="#fff" fill="none">
+    <path d="M0 330 C180 240 320 385 500 310 S760 240 900 300" stroke-width="3"/>
+    <path d="M110 0 V420M250 0 V420M390 0 V420M530 0 V420M670 0 V420M810 0 V420"/>
+  </g>
+  <g transform="translate(110 74)" filter="url(#s)">
+    <rect width="148" height="212" rx="18" fill="#fff8e6" stroke="#ffcf4a" stroke-width="7"/>
+    <text x="24" y="58" font-family="Arial" font-size="44" font-weight="900" fill="#c5232d">A</text>
+    <text x="55" y="132" font-family="Arial" font-size="70" font-weight="900" fill="#c5232d">♥</text>
+  </g>
+  <g transform="translate(235 94) rotate(9)" filter="url(#s)">
+    <rect width="148" height="212" rx="18" fill="#f7fbff" stroke="#1f78ff" stroke-width="7"/>
+    <text x="24" y="58" font-family="Arial" font-size="44" font-weight="900" fill="#17232b">K</text>
+    <text x="55" y="132" font-family="Arial" font-size="70" font-weight="900" fill="#17232b">♠</text>
+  </g>
+  <g transform="translate(540 118)" filter="url(#s)">
+    <circle cx="64" cy="64" r="64" fill="#ffcf4a"/>
+    <circle cx="64" cy="64" r="45" fill="none" stroke="#fff" stroke-width="8"/>
+    <text x="38" y="82" font-family="Arial" font-size="42" font-weight="900" fill="#10355f">W</text>
+  </g>
+  <text x="520" y="270" font-family="Arial" font-size="56" font-weight="900" fill="#fff">CASINO AI</text>
+  <text x="520" y="306" font-family="Arial" font-size="22" font-weight="800" fill="#dcefff">Cards · Chips · Robot Dealer</text>
+</svg>

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 520">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#06172b"/>
+      <stop offset=".5" stop-color="#0b4f6f"/>
+      <stop offset="1" stop-color="#06110d"/>
+    </linearGradient>
+    <radialGradient id="neon" cx=".5" cy=".42" r=".6">
+      <stop offset="0" stop-color="#2ee6ff" stop-opacity=".62"/>
+      <stop offset=".5" stop-color="#19c37d" stop-opacity=".3"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="18" stdDeviation="18" flood-opacity=".36"/></filter>
+  </defs>
+  <rect width="900" height="520" fill="url(#bg)"/>
+  <rect width="900" height="520" fill="url(#neon)"/>
+  <path d="M90 392h720" stroke="#9df3ff" stroke-opacity=".35" stroke-width="4"/>
+  <path d="M170 394c80-160 185-232 318-216 110 13 188 86 244 216" fill="none" stroke="#2ee6ff" stroke-width="9" stroke-linecap="round"/>
+  <g filter="url(#shadow)">
+    <path d="M254 345l96-52 60 28 54-88 86 72 94-30 82 70-110 42H366z" fill="#f7fbff" opacity=".96"/>
+    <circle cx="540" cy="235" r="48" fill="#ffcf4a"/>
+    <circle cx="540" cy="235" r="22" fill="#06172b"/>
+    <rect x="318" y="252" width="96" height="54" rx="27" fill="#ff2f7d"/>
+    <rect x="628" y="248" width="96" height="54" rx="27" fill="#16b56f"/>
+  </g>
+  <g font-family="Arial, sans-serif" font-size="48" font-weight="900" fill="#ffffff" opacity=".92">
+    <text x="248" y="168">x1.00</text>
+    <text x="566" y="166">x1000</text>
+  </g>
+</svg>

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <defs>
+    <linearGradient id="court" x1="0" x2="1" y1="0" y2="1">
+      <stop stop-color="#f6fbff"/>
+      <stop offset=".55" stop-color="#8fc3ff"/>
+      <stop offset="1" stop-color="#1f78ff"/>
+    </linearGradient>
+    <radialGradient id="ball" cx="35%" cy="28%" r="70%">
+      <stop stop-color="#ffcf4a"/>
+      <stop offset=".7" stop-color="#ff7a1a"/>
+      <stop offset="1" stop-color="#b45309"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#court)"/>
+  <path d="M0 300h640M90 300c26-92 434-92 460 0M210 300c15-42 205-42 220 0" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="5"/>
+  <rect x="432" y="72" width="90" height="58" rx="7" fill="#fff" opacity=".86"/>
+  <rect x="454" y="92" width="46" height="22" rx="4" fill="none" stroke="#ff3d7f" stroke-width="5"/>
+  <path d="M478 114v54" stroke="#ff3d7f" stroke-width="7"/>
+  <ellipse cx="478" cy="172" rx="47" ry="11" fill="none" stroke="#ffcf4a" stroke-width="7"/>
+  <circle cx="214" cy="166" r="61" fill="url(#ball)"/>
+  <path d="M153 166h122M214 105v122M171 124c25 24 62 61 86 104M258 125c-29 25-66 61-87 103" stroke="#7c2d12" stroke-opacity=".75" stroke-width="5" fill="none"/>
+  <path d="M276 146c54-74 122-82 194-58" stroke="#fff" stroke-width="7" stroke-dasharray="12 12" fill="none" opacity=".85"/>
+</svg>

@@ -1,0 +1,54 @@
+FINAL RESULT FOR THIS PROJECT
+
+Best final setup:
+1. Put the whole project on GitHub.
+2. Deploy the Node server to Render.
+3. Optionally publish the docs folder to GitHub Pages.
+
+Why this is the best result:
+- Other devices can open it.
+- All users share one backend.
+- Admin receives registrations, point requests, bets, and logs.
+- NBA / World Cup style fixtures auto-update from the online server.
+- GitHub still stores your code and can also host a static front copy.
+
+Use this as your real production URL:
+- Front:
+  https://YOUR-RENDER-DOMAIN/win10bet.html
+- Admin:
+  https://YOUR-RENDER-DOMAIN/admin.html
+
+Optional GitHub Pages front:
+- Publish /docs
+- Edit docs/win10bet-config.js
+- Set:
+  apiBase: "https://YOUR-RENDER-DOMAIN"
+- Then users can open:
+  https://YOUR-NAME.github.io/YOUR-REPO/win10bet.html
+
+Important:
+- GitHub Pages alone is not enough.
+- The auto-updating fixtures and shared admin backend come from the Render Node server.
+
+Render settings:
+- Build command: npm install
+- Start command: npm start
+- Environment variables:
+  ADMIN_USER=win10bet-admin
+  ADMIN_PASSWORD=your-password
+  DATA_DIR=/var/data
+- Enable persistent disk on /var/data
+
+What is already prepared in this project:
+- render.yaml exists
+- package.json start script exists
+- outputs/win10bet-server.js serves frontend + admin + API
+- /api/fixtures auto-loads upcoming fixtures
+- docs folder is prepared for GitHub Pages
+- docs/win10bet-config.js is ready for your online API domain
+
+What you should upload to GitHub:
+- The whole project folder
+
+What you should publish to GitHub Pages:
+- /docs

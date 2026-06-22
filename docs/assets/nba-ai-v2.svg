@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#07172b"/>
+      <stop offset=".5" stop-color="#1f3f8f"/>
+      <stop offset="1" stop-color="#36111e"/>
+    </linearGradient>
+    <radialGradient id="light" cx=".62" cy=".35" r=".58">
+      <stop offset="0" stop-color="#ffcf4a" stop-opacity=".55"/>
+      <stop offset=".48" stop-color="#ff5f57" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="20" stdDeviation="18" flood-opacity=".38"/></filter>
+  </defs>
+  <rect width="1200" height="520" fill="url(#bg)"/>
+  <rect width="1200" height="520" fill="url(#light)"/>
+  <path d="M0 410c190-74 396-102 620-86 215 15 397 67 580 136v60H0z" fill="#071018" opacity=".72"/>
+  <g filter="url(#shadow)">
+    <circle cx="704" cy="256" r="116" fill="#d9792b"/>
+    <path d="M604 204c55 34 124 36 200 4M596 304c68-40 142-42 218-6M704 140v232M588 256h232" stroke="#3b1f12" stroke-width="10" fill="none"/>
+    <rect x="438" y="92" width="250" height="18" rx="9" fill="#f7fbff"/>
+    <rect x="676" y="92" width="18" height="172" rx="9" fill="#f7fbff"/>
+    <rect x="610" y="252" width="142" height="12" rx="6" fill="#ffcf4a"/>
+  </g>
+  <g font-family="Arial, sans-serif" font-weight="900" fill="#fff">
+    <text x="72" y="124" font-size="52">NBA FINALS</text>
+    <text x="72" y="178" font-size="26" opacity=".84">SPREAD · TOTAL · MONEYLINE</text>
+  </g>
+</svg>

@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: win10bet
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: ADMIN_USER
+        value: win10bet-admin
+      - key: ADMIN_PASSWORD
+        generateValue: true
+      - key: DATA_DIR
+        value: /var/data
+    disk:
+      name: win10bet-data
+      mountPath: /var/data
+      sizeGB: 1

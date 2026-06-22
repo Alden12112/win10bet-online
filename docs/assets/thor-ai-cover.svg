@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420">
+  <defs><radialGradient id="g" cx=".65" cy=".25" r=".65"><stop offset="0" stop-color="#9ee8ff"/><stop offset=".4" stop-color="#1f78ff"/><stop offset="1" stop-color="#071b3a"/></radialGradient></defs>
+  <rect width="900" height="420" fill="url(#g)"/>
+  <g fill="#fff" opacity=".16">
+    <rect x="92" y="66" width="82" height="82" rx="16"/>
+    <rect x="184" y="66" width="82" height="82" rx="16"/>
+    <rect x="276" y="66" width="82" height="82" rx="16"/>
+    <rect x="92" y="158" width="82" height="82" rx="16"/>
+    <rect x="184" y="158" width="82" height="82" rx="16"/>
+    <rect x="276" y="158" width="82" height="82" rx="16"/>
+  </g>
+  <text x="500" y="164" font-family="Arial" font-size="118" font-weight="900" fill="#ffcf4a">⚡</text>
+  <text x="430" y="280" font-family="Arial" font-size="70" font-weight="900" fill="#fff">THOR 5x5</text>
+  <text x="435" y="318" font-family="Arial" font-size="24" font-weight="800" fill="#dff2ff">FREE SPINS · MULTIPLIER</text>
+</svg>

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#06351f"/>
+      <stop offset=".48" stop-color="#0b6b42"/>
+      <stop offset="1" stop-color="#07172b"/>
+    </linearGradient>
+    <radialGradient id="stadium" cx=".5" cy=".2" r=".75">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".7"/>
+      <stop offset=".42" stop-color="#1f78ff" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="shadow"><feDropShadow dx="0" dy="20" stdDeviation="18" flood-opacity=".38"/></filter>
+  </defs>
+  <rect width="1200" height="520" fill="url(#bg)"/>
+  <rect width="1200" height="520" fill="url(#stadium)"/>
+  <path d="M0 370c180-74 382-106 590-98 235 9 430 66 610 144v104H0z" fill="#071018" opacity=".68"/>
+  <ellipse cx="600" cy="398" rx="420" ry="92" fill="#0b7a43" stroke="#b8ffd8" stroke-opacity=".34" stroke-width="6"/>
+  <path d="M250 398h700M600 306v184" stroke="#dfffee" stroke-opacity=".38" stroke-width="5"/>
+  <circle cx="600" cy="398" r="62" fill="none" stroke="#dfffee" stroke-opacity=".38" stroke-width="5"/>
+  <g filter="url(#shadow)">
+    <circle cx="600" cy="232" r="94" fill="#f7fbff"/>
+    <path d="M600 152l50 36-18 58h-64l-18-58z" fill="#101722"/>
+    <path d="M522 230l48 18 0 54-52 28-36-48zM678 230l-48 18 0 54 52 28 36-48zM571 318h58l31 46-60 28-60-28z" fill="#101722"/>
+  </g>
+  <g font-family="Arial, sans-serif" font-weight="900" fill="#fff">
+    <text x="72" y="118" font-size="44">WORLD CUP</text>
+    <text x="72" y="168" font-size="26" opacity=".82">MATCH MARKETS · POINTS BETTING</text>
+  </g>
+</svg>

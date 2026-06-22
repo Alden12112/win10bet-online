@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420">
+  <rect width="900" height="420" fill="#0d2f66"/>
+  <g transform="translate(130 90)">
+    <circle cx="90" cy="90" r="88" fill="#1f78ff"/>
+    <circle cx="90" cy="90" r="58" fill="none" stroke="#fff" stroke-width="12"/>
+    <text x="58" y="110" font-family="Arial" font-size="54" font-weight="900" fill="#fff">10</text>
+  </g>
+  <g transform="translate(270 136)">
+    <circle cx="90" cy="90" r="88" fill="#ffcf4a"/>
+    <circle cx="90" cy="90" r="58" fill="none" stroke="#fff" stroke-width="12"/>
+    <text x="58" y="110" font-family="Arial" font-size="54" font-weight="900" fill="#10213f">50</text>
+  </g>
+  <text x="520" y="190" font-family="Arial" font-size="70" font-weight="900" fill="#fff">POINTS</text>
+  <text x="524" y="236" font-family="Arial" font-size="26" font-weight="800" fill="#cfe7ff">CHIPS · BALANCE · REQUEST</text>
+</svg>

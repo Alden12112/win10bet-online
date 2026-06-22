@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360">
+  <defs>
+    <linearGradient id="court" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#dcecff"/>
+      <stop offset="1" stop-color="#b5f5d9"/>
+    </linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#court)"/>
+  <rect x="74" y="58" width="492" height="244" rx="18" fill="#1f78ff"/>
+  <path d="M320 58v244M74 180h492M164 58v244M476 58v244" stroke="#fff" stroke-width="7" opacity=".82"/>
+  <path d="M150 292 458 82" stroke="#ffcf4a" stroke-width="8" stroke-dasharray="16 14" fill="none"/>
+  <circle cx="458" cy="82" r="28" fill="#ffcf4a" stroke="#fff" stroke-width="7"/>
+  <text x="92" y="112" font-family="Arial, sans-serif" font-size="62" font-weight="900" fill="#fff">ACE</text>
+  <text x="92" y="142" font-family="Arial, sans-serif" font-size="20" font-weight="900" fill="#dbeafe">INNER / ACE / OUTER</text>
+</svg>
