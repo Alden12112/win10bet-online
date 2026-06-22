@@ -305,6 +305,245 @@ function marketProbability(seed, index, sport) {
   return [Math.min(0.58, home), draw, Math.max(0.18, 1 - home - draw)];
 }
 
+function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value));
+}
+
+function round(value, digits = 2) {
+  const factor = 10 ** digits;
+  return Math.round(Number(value || 0) * factor) / factor;
+}
+
+function parseNumber(value) {
+  if (value === null || value === undefined || value === "") return null;
+  const cleaned = String(value).replace(/[^\d.+-]/g, "");
+  const parsed = Number(cleaned);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function americanToDecimal(value) {
+  const odds = parseNumber(value);
+  if (!Number.isFinite(odds) || odds === 0) return null;
+  return odds > 0 ? 1 + (odds / 100) : 1 + (100 / Math.abs(odds));
+}
+
+function decimalToProbability(decimal) {
+  if (!Number.isFinite(decimal) || decimal <= 1) return null;
+  return 1 / decimal;
+}
+
+function normalizeProbabilities(values, fallback) {
+  const valid = values.map(item => Number(item)).filter(item => Number.isFinite(item) && item > 0);
+  if (!valid.length) return fallback;
+  const total = valid.reduce((sum, item) => sum + item, 0);
+  const normalized = values.map(item => {
+    if (!Number.isFinite(item) || item <= 0) return null;
+    return item / total;
+  });
+  if (normalized.every(item => Number.isFinite(item))) return normalized;
+  return fallback;
+}
+
+function makePrice(probability, margin = 0.93) {
+  return round(Math.max(1.05, margin / clamp(probability || 0.01, 0.01, 0.92)));
+}
+
+function createMarket(label, odd, chance, group = "main") {
+  const decimal = Number(odd);
+  if (!Number.isFinite(decimal) || decimal < 1.01) return null;
+  return {
+    label,
+    odd: round(decimal),
+    chance: round(clamp(Number(chance || 0.01), 0.01, 0.92), 3),
+    group
+  };
+}
+
+function pairProbabilities(first, second, fallbackFirst = 0.5) {
+  const fallback = [fallbackFirst, 1 - fallbackFirst];
+  return normalizeProbabilities([first, second], fallback);
+}
+
+function formatLine(value, positivePrefix = "+") {
+  const line = parseNumber(value);
+  if (!Number.isFinite(line)) return null;
+  if (line > 0) return `${positivePrefix}${round(line, 1)}`;
+  if (line < 0) return `${round(line, 1)}`;
+  return "0";
+}
+
+function firstDefined(...values) {
+  for (const value of values) {
+    if (value !== null && value !== undefined && value !== "") return value;
+  }
+  return null;
+}
+
+function moneylineProbabilities(odds, fallback) {
+  const homeProb = decimalToProbability(americanToDecimal(firstDefined(
+    odds?.moneyline?.home?.close?.odds,
+    odds?.moneyline?.home?.open?.odds
+  )));
+  const drawProb = decimalToProbability(americanToDecimal(firstDefined(
+    odds?.moneyline?.draw?.close?.odds,
+    odds?.moneyline?.draw?.open?.odds,
+    odds?.drawOdds?.moneyLine
+  )));
+  const awayProb = decimalToProbability(americanToDecimal(firstDefined(
+    odds?.moneyline?.away?.close?.odds,
+    odds?.moneyline?.away?.open?.odds
+  )));
+  return normalizeProbabilities([homeProb, drawProb, awayProb], fallback);
+}
+
+function footballMarketsFromData(data) {
+  const fallback = data.probs || [0.46, 0.28, 0.26];
+  const probs = moneylineProbabilities(data.odds, fallback);
+  const homeOdd = americanToDecimal(firstDefined(data.odds?.moneyline?.home?.close?.odds, data.odds?.moneyline?.home?.open?.odds)) || makePrice(probs[0]);
+  const drawOdd = americanToDecimal(firstDefined(data.odds?.moneyline?.draw?.close?.odds, data.odds?.moneyline?.draw?.open?.odds, data.odds?.drawOdds?.moneyLine)) || makePrice(probs[1]);
+  const awayOdd = americanToDecimal(firstDefined(data.odds?.moneyline?.away?.close?.odds, data.odds?.moneyline?.away?.open?.odds)) || makePrice(probs[2]);
+  const spreadHomeLine = parseNumber(firstDefined(data.odds?.pointSpread?.home?.close?.line, data.odds?.pointSpread?.home?.open?.line, "-0.5"));
+  const spreadAwayLine = parseNumber(firstDefined(data.odds?.pointSpread?.away?.close?.line, data.odds?.pointSpread?.away?.open?.line, spreadHomeLine !== null ? Math.abs(spreadHomeLine) : "+0.5"));
+  const spreadProbs = pairProbabilities(
+    decimalToProbability(americanToDecimal(firstDefined(data.odds?.pointSpread?.home?.close?.odds, data.odds?.pointSpread?.home?.open?.odds))),
+    decimalToProbability(americanToDecimal(firstDefined(data.odds?.pointSpread?.away?.close?.odds, data.odds?.pointSpread?.away?.open?.odds))),
+    clamp(probs[0] + probs[1] * 0.35, 0.44, 0.64)
+  );
+  const spreadHomeOdd = americanToDecimal(firstDefined(data.odds?.pointSpread?.home?.close?.odds, data.odds?.pointSpread?.home?.open?.odds)) || makePrice(spreadProbs[0], 0.95);
+  const spreadAwayOdd = americanToDecimal(firstDefined(data.odds?.pointSpread?.away?.close?.odds, data.odds?.pointSpread?.away?.open?.odds)) || makePrice(spreadProbs[1], 0.95);
+  const totalLine = parseNumber(firstDefined(data.odds?.total?.over?.close?.line, data.odds?.total?.over?.open?.line, data.odds?.overUnder, 2.5)) || 2.5;
+  const totalProbs = pairProbabilities(
+    decimalToProbability(americanToDecimal(firstDefined(data.odds?.total?.over?.close?.odds, data.odds?.total?.over?.open?.odds))),
+    decimalToProbability(americanToDecimal(firstDefined(data.odds?.total?.under?.close?.odds, data.odds?.total?.under?.open?.odds))),
+    0.51
+  );
+  const overOdd = americanToDecimal(firstDefined(data.odds?.total?.over?.close?.odds, data.odds?.total?.over?.open?.odds)) || makePrice(totalProbs[0], 0.95);
+  const underOdd = americanToDecimal(firstDefined(data.odds?.total?.under?.close?.odds, data.odds?.total?.under?.open?.odds)) || makePrice(totalProbs[1], 0.95);
+  const doubleChanceHomeDraw = clamp(probs[0] + probs[1] - 0.03, 0.25, 0.89);
+  const doubleChanceHomeAway = clamp(probs[0] + probs[2] - 0.03, 0.25, 0.89);
+  const doubleChanceDrawAway = clamp(probs[1] + probs[2] - 0.03, 0.25, 0.89);
+  const bothTeamsYes = clamp((probs[0] + probs[2]) * 0.58 + 0.13, 0.34, 0.69);
+  const bothTeamsNo = clamp(1 - bothTeamsYes, 0.31, 0.66);
+  const homeFirstHalf = clamp(probs[0] * 0.66, 0.16, 0.52);
+  const drawFirstHalf = clamp(probs[1] * 1.2 + 0.11, 0.18, 0.48);
+  const awayFirstHalf = clamp(1 - homeFirstHalf - drawFirstHalf, 0.14, 0.44);
+  return [
+    createMarket("主胜", homeOdd, probs[0], "main"),
+    createMarket("平局", drawOdd, probs[1], "main"),
+    createMarket("客胜", awayOdd, probs[2], "main"),
+    createMarket(`主队 ${formatLine(spreadHomeLine, "+")}`, spreadHomeOdd, spreadProbs[0], "main"),
+    createMarket(`客队 ${formatLine(spreadAwayLine, "+")}`, spreadAwayOdd, spreadProbs[1], "extra"),
+    createMarket(`大 ${round(totalLine, 1)}`, overOdd, totalProbs[0], "extra"),
+    createMarket(`小 ${round(totalLine, 1)}`, underOdd, totalProbs[1], "extra"),
+    createMarket("主/平", makePrice(doubleChanceHomeDraw, 0.92), doubleChanceHomeDraw, "extra"),
+    createMarket("主/客", makePrice(doubleChanceHomeAway, 0.92), doubleChanceHomeAway, "extra"),
+    createMarket("平/客", makePrice(doubleChanceDrawAway, 0.92), doubleChanceDrawAway, "extra"),
+    createMarket("双方进球 是", makePrice(bothTeamsYes, 0.94), bothTeamsYes, "extra"),
+    createMarket("双方进球 否", makePrice(bothTeamsNo, 0.94), bothTeamsNo, "extra"),
+    createMarket("半场主胜", makePrice(homeFirstHalf, 0.92), homeFirstHalf, "extra"),
+    createMarket("半场平局", makePrice(drawFirstHalf, 0.92), drawFirstHalf, "extra"),
+    createMarket("半场客胜", makePrice(awayFirstHalf, 0.92), awayFirstHalf, "extra")
+  ].filter(Boolean);
+}
+
+function nbaMarketsFromData(data) {
+  const fallback = data.probs || [0.52, 0.48];
+  const homeRaw = decimalToProbability(americanToDecimal(firstDefined(
+    data.odds?.moneyline?.home?.close?.odds,
+    data.odds?.moneyline?.home?.open?.odds
+  )));
+  const awayRaw = decimalToProbability(americanToDecimal(firstDefined(
+    data.odds?.moneyline?.away?.close?.odds,
+    data.odds?.moneyline?.away?.open?.odds
+  )));
+  const probs = pairProbabilities(homeRaw, awayRaw, fallback[0]);
+  const homeOdd = americanToDecimal(firstDefined(data.odds?.moneyline?.home?.close?.odds, data.odds?.moneyline?.home?.open?.odds)) || makePrice(probs[0]);
+  const awayOdd = americanToDecimal(firstDefined(data.odds?.moneyline?.away?.close?.odds, data.odds?.moneyline?.away?.open?.odds)) || makePrice(probs[1]);
+  const spreadLine = parseNumber(firstDefined(
+    data.odds?.spread?.line,
+    data.odds?.pointSpread?.home?.close?.line,
+    data.odds?.pointSpread?.home?.open?.line,
+    data.spread,
+    "-2.5"
+  )) || -2.5;
+  const spreadProbs = pairProbabilities(
+    decimalToProbability(americanToDecimal(firstDefined(data.odds?.pointSpread?.home?.close?.odds, data.odds?.pointSpread?.home?.open?.odds))),
+    decimalToProbability(americanToDecimal(firstDefined(data.odds?.pointSpread?.away?.close?.odds, data.odds?.pointSpread?.away?.open?.odds))),
+    clamp(probs[0] + 0.02, 0.45, 0.62)
+  );
+  const totalLine = parseNumber(firstDefined(data.odds?.total?.over?.close?.line, data.odds?.total?.over?.open?.line, data.total, 219.5)) || 219.5;
+  const totalProbs = pairProbabilities(
+    decimalToProbability(americanToDecimal(firstDefined(data.odds?.total?.over?.close?.odds, data.odds?.total?.over?.open?.odds))),
+    decimalToProbability(americanToDecimal(firstDefined(data.odds?.total?.under?.close?.odds, data.odds?.total?.under?.open?.odds))),
+    0.5
+  );
+  const spreadHomeOdd = americanToDecimal(firstDefined(data.odds?.pointSpread?.home?.close?.odds, data.odds?.pointSpread?.home?.open?.odds)) || makePrice(spreadProbs[0], 0.95);
+  const spreadAwayOdd = americanToDecimal(firstDefined(data.odds?.pointSpread?.away?.close?.odds, data.odds?.pointSpread?.away?.open?.odds)) || makePrice(spreadProbs[1], 0.95);
+  const overOdd = americanToDecimal(firstDefined(data.odds?.total?.over?.close?.odds, data.odds?.total?.over?.open?.odds)) || makePrice(totalProbs[0], 0.95);
+  const underOdd = americanToDecimal(firstDefined(data.odds?.total?.under?.close?.odds, data.odds?.total?.under?.open?.odds)) || makePrice(totalProbs[1], 0.95);
+  const firstHalfHome = clamp(probs[0] * 0.96, 0.34, 0.66);
+  const firstHalfAway = clamp(1 - firstHalfHome, 0.34, 0.66);
+  const firstQuarterHome = clamp(probs[0] * 0.98, 0.34, 0.66);
+  const firstQuarterAway = clamp(1 - firstQuarterHome, 0.34, 0.66);
+  return [
+    createMarket("主胜", homeOdd, probs[0], "main"),
+    createMarket("客胜", awayOdd, probs[1], "main"),
+    createMarket(`主队 ${formatLine(spreadLine, "+")}`, spreadHomeOdd, spreadProbs[0], "main"),
+    createMarket(`客队 ${formatLine(-spreadLine, "+")}`, spreadAwayOdd, spreadProbs[1], "extra"),
+    createMarket(`大 ${round(totalLine, 1)}`, overOdd, totalProbs[0], "extra"),
+    createMarket(`小 ${round(totalLine, 1)}`, underOdd, totalProbs[1], "extra"),
+    createMarket("上半场主胜", makePrice(firstHalfHome, 0.94), firstHalfHome, "extra"),
+    createMarket("上半场客胜", makePrice(firstHalfAway, 0.94), firstHalfAway, "extra"),
+    createMarket("第1节主胜", makePrice(firstQuarterHome, 0.95), firstQuarterHome, "extra"),
+    createMarket("第1节客胜", makePrice(firstQuarterAway, 0.95), firstQuarterAway, "extra"),
+    createMarket(`总分 200-${Math.max(200, Math.floor(totalLine))}`, makePrice(0.29, 0.95), 0.29, "extra"),
+    createMarket(`总分 ${Math.ceil(totalLine)}+`, makePrice(0.34, 0.95), 0.34, "extra")
+  ].filter(Boolean);
+}
+
+function twoWayMarketsFromData(data) {
+  const homeProb = clamp(Number(data.homeProb || 0.52), 0.16, 0.84);
+  const awayProb = clamp(1 - homeProb, 0.16, 0.84);
+  return [
+    createMarket("主胜", makePrice(homeProb), homeProb, "main"),
+    createMarket("客胜", makePrice(awayProb), awayProb, "main"),
+    createMarket("让分主胜", makePrice(clamp(homeProb - 0.02, 0.18, 0.82), 0.95), clamp(homeProb - 0.02, 0.18, 0.82), "extra"),
+    createMarket("让分客胜", makePrice(clamp(awayProb - 0.02, 0.18, 0.82), 0.95), clamp(awayProb - 0.02, 0.18, 0.82), "extra"),
+    createMarket("大分", makePrice(0.49, 0.95), 0.49, "extra"),
+    createMarket("小分", makePrice(0.48, 0.95), 0.48, "extra"),
+    createMarket("第一局主胜", makePrice(clamp(homeProb * 0.94, 0.18, 0.82), 0.94), clamp(homeProb * 0.94, 0.18, 0.82), "extra"),
+    createMarket("第一局客胜", makePrice(clamp(awayProb * 0.94, 0.18, 0.82), 0.94), clamp(awayProb * 0.94, 0.18, 0.82), "extra")
+  ].filter(Boolean);
+}
+
+function teamName(competitor) {
+  return competitor?.team?.displayName
+    || competitor?.team?.shortDisplayName
+    || competitor?.team?.name
+    || competitor?.athlete?.displayName
+    || competitor?.athlete?.shortName
+    || competitor?.displayName
+    || "Team";
+}
+
+function teamLogo(competitor) {
+  return competitor?.team?.logo
+    || competitor?.athlete?.flag?.href
+    || competitor?.athlete?.headshot
+    || "";
+}
+
+function fixturePriority(item) {
+  const start = new Date(item.startAt || 0).getTime();
+  const dayDiff = Math.floor(start / DAY) - Math.floor(Date.now() / DAY);
+  const isWorldCup = item.sport === text.worldCup;
+  const sportRank = item.sport === text.worldCup ? 0 : item.sport === "NBA" ? 1 : item.sport === "网球" ? 2 : 3;
+  return (isWorldCup && dayDiff >= 0 && dayDiff < 3 ? -1000 : 0)
+    + (dayDiff === 0 ? -400 : 0)
+    + sportRank * 10
+    + start / 1e11;
+}
+
 function mapEspnEvent(event, sport, index) {
   const competition = event.competitions && event.competitions[0];
   const competitors = competition?.competitors || [];
@@ -315,22 +554,31 @@ function mapEspnEvent(event, sport, index) {
   const duration = sport === "NBA" ? 165 * 60 * 1000 : 130 * 60 * 1000;
   const endAt = new Date(new Date(startAt).getTime() + duration).toISOString();
   if (Date.now() >= new Date(endAt).getTime()) return null;
-  const homeName = home.team?.displayName || home.team?.shortDisplayName || home.team?.name || "Home";
-  const awayName = away.team?.displayName || away.team?.shortDisplayName || away.team?.name || "Away";
-  return {
+  const homeName = teamName(home);
+  const awayName = teamName(away);
+  const odds = competition?.odds?.[0] || null;
+  const fallbackProbs = marketProbability(String(event.id || "").length, index, sport);
+  const fixture = {
     id: `live-${sport.toLowerCase().replace(/\W/g, "")}-${event.id || crypto.createHash("md5").update(`${sport}-${homeName}-${awayName}-${startAt}`).digest("hex").slice(0, 10)}`,
     sport,
-    league: event.league?.name || (sport === "NBA" ? "NBA Auto Board" : "FIFA World Cup Auto"),
+    league: competition?.altGameNote || event.league?.name || (sport === "NBA" ? "NBA Auto Board" : "FIFA World Cup Auto"),
     startAt,
     endAt,
     home: homeName,
     away: awayName,
     type: sport === "NBA" ? "nba" : "football",
-    source: "ESPN scoreboard",
-    probs: marketProbability(String(event.id || "").length, index, sport),
-    spread: index % 2 ? "-2.5" : "-4.5",
-    total: index % 2 ? "219.5" : "224.5"
+    source: odds?.provider?.displayName || odds?.provider?.name
+      ? `ESPN / ${odds.provider.displayName || odds.provider.name}`
+      : "ESPN scoreboard",
+    venue: competition?.venue?.fullName || competition?.venue?.address?.city || event?.status?.type?.detail || "",
+    homeLogo: teamLogo(home),
+    awayLogo: teamLogo(away),
+    probs: fallbackProbs,
+    odds
   };
+  fixture.markets = sport === "NBA" ? nbaMarketsFromData(fixture) : footballMarketsFromData(fixture);
+  fixture.priority = fixturePriority(fixture);
+  return fixture;
 }
 
 async function remoteFixtures() {
@@ -356,6 +604,42 @@ async function remoteFixtures() {
   return fixtures;
 }
 
+function supplementalFixtures() {
+  const sports = [
+    { sport: "网球", league: "ATP 热门场", teams: [["Carlos Alcaraz", "Alex de Minaur"], ["Novak Djokovic", "Taylor Fritz"], ["Jannik Sinner", "Ben Shelton"]], hours: [14, 19, 22], duration: 125, ticket: "flow" },
+    { sport: "羽毛球", league: "国际公开赛", teams: [["李梓嘉", "石宇奇"], ["安东森", "昆拉武特"], ["周天成", "骆建佑"]], hours: [12, 17, 21], duration: 80, ticket: "flow" },
+    { sport: "电竞", league: "全球冠军赛", teams: [["Blue Nova", "Red Pulse"], ["Arctic Core", "Quantum Five"], ["Radiant X", "Dire Zero"]], hours: [16, 20, 23], duration: 150, ticket: "flow" }
+  ];
+  const fixtures = [];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  sports.forEach((group, groupIndex) => {
+    for (let day = 0; day < 3; day += 1) {
+      const start = new Date(today.getTime() + day * DAY);
+      start.setHours(group.hours[day], 0, 0, 0);
+      const teams = group.teams[(groupIndex + day) % group.teams.length];
+      const homeProb = clamp(0.47 + ((groupIndex + day) % 3) * 0.05, 0.36, 0.64);
+      const base = {
+        id: `auto-${group.sport}-${start.toISOString().slice(0, 10)}-${groupIndex}-${day}`.replace(/[^\w-]/g, ""),
+        sport: group.sport,
+        league: group.league,
+        startAt: start.toISOString(),
+        endAt: new Date(start.getTime() + group.duration * 60 * 1000).toISOString(),
+        home: teams[0],
+        away: teams[1],
+        type: "other",
+        ticket: group.ticket,
+        source: "Auto schedule",
+        probs: [homeProb, 1 - homeProb]
+      };
+      base.markets = twoWayMarketsFromData({ homeProb });
+      base.priority = fixturePriority(base);
+      fixtures.push(base);
+    }
+  });
+  return fixtures.filter(item => Date.now() < new Date(item.endAt).getTime());
+}
+
 function fallbackFixtures() {
   const footballTeams = [
     ["Brazil", "Germany"],
@@ -376,26 +660,13 @@ function fallbackFixtures() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const fixtures = [];
+  const worldCupHours = [1, 5, 9, 23];
   for (let i = 0; i < 5; i += 1) {
     const base = new Date(today.getTime() + i * DAY);
-    const wcStart = new Date(base);
-    wcStart.setHours(i % 2 ? 22 : 3, 0, 0, 0);
     const nbaStart = new Date(base);
     nbaStart.setHours(8, 30, 0, 0);
-    const wcTeams = footballTeams[i % footballTeams.length];
     const nba = nbaTeams[i % nbaTeams.length];
-    fixtures.push({
-      id: `auto-wc-${wcStart.toISOString().slice(0, 10)}-${i}`,
-      sport: text.worldCup,
-      league: "FIFA World Cup Auto",
-      startAt: wcStart.toISOString(),
-      endAt: new Date(wcStart.getTime() + 130 * 60 * 1000).toISOString(),
-      home: wcTeams[0],
-      away: wcTeams[1],
-      type: "football",
-      probs: [0.44 + (i % 3) * 0.04, 0.28, 0.28 - (i % 3) * 0.04]
-    });
-    fixtures.push({
+    const nbaFixture = {
       id: `auto-nba-${nbaStart.toISOString().slice(0, 10)}-${i}`,
       sport: "NBA",
       league: "NBA Auto Board",
@@ -407,15 +678,51 @@ function fallbackFixtures() {
       probs: [0.52 - (i % 2) * 0.05, 0.48 + (i % 2) * 0.05],
       spread: i % 2 ? "-2.5" : "-4.5",
       total: i % 2 ? "219.5" : "224.5"
-    });
+    };
+    nbaFixture.markets = nbaMarketsFromData(nbaFixture);
+    nbaFixture.priority = fixturePriority(nbaFixture);
+    fixtures.push(nbaFixture);
+    const matchesPerDay = i === 0 ? 4 : 2;
+    for (let slot = 0; slot < matchesPerDay; slot += 1) {
+      const wcStart = new Date(base);
+      wcStart.setHours(worldCupHours[(i + slot) % worldCupHours.length], 0, 0, 0);
+      const wcTeams = footballTeams[(i * 2 + slot) % footballTeams.length];
+      const wcFixture = {
+        id: `auto-wc-${wcStart.toISOString().slice(0, 10)}-${i}-${slot}`,
+        sport: text.worldCup,
+        league: `FIFA World Cup Auto · Matchday ${i + 1}`,
+        startAt: wcStart.toISOString(),
+        endAt: new Date(wcStart.getTime() + 130 * 60 * 1000).toISOString(),
+        home: wcTeams[0],
+        away: wcTeams[1],
+        type: "football",
+        source: "Auto board",
+        probs: [0.42 + ((slot + i) % 3) * 0.05, 0.27, 0.31 - ((slot + i) % 3) * 0.03]
+      };
+      wcFixture.markets = footballMarketsFromData(wcFixture);
+      wcFixture.priority = fixturePriority(wcFixture);
+      fixtures.push(wcFixture);
+    }
   }
-  return fixtures.filter(item => Date.now() < new Date(item.endAt).getTime());
+  return [...fixtures, ...supplementalFixtures()]
+    .filter(item => Date.now() < new Date(item.endAt).getTime())
+    .sort((a, b) => a.priority - b.priority || new Date(a.startAt).getTime() - new Date(b.startAt).getTime());
 }
 
 async function autoFixtures() {
   try {
     const live = await remoteFixtures();
-    if (live.length) return live;
+    if (live.length) {
+      const merged = [...live, ...supplementalFixtures()];
+      const seen = new Set();
+      return merged
+        .filter(item => {
+          if (seen.has(item.id)) return false;
+          seen.add(item.id);
+          return Date.now() < new Date(item.endAt).getTime();
+        })
+        .sort((a, b) => a.priority - b.priority || new Date(a.startAt).getTime() - new Date(b.startAt).getTime());
+    }
   } catch {
     // Offline fallback keeps the sportsbook populated without manual work.
   }

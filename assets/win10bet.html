@@ -2378,6 +2378,29 @@
       box-shadow: 0 -8px 0 rgba(255,255,255,.22);
     }
 
+    .team-badge.has-logo {
+      background:
+        radial-gradient(circle at 32% 28%, rgba(255,255,255,.6), transparent 20%),
+        linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,0) 38%),
+        linear-gradient(135deg, var(--badge-a), var(--badge-b));
+    }
+
+    .team-badge-logo {
+      position: absolute;
+      inset: 10px 9px 12px;
+      z-index: 1;
+      width: calc(100% - 18px);
+      height: calc(100% - 22px);
+      object-fit: contain;
+      filter: drop-shadow(0 3px 6px rgba(0,0,0,.22));
+    }
+
+    .team-badge.has-logo .badge-ring,
+    .team-badge.has-logo .badge-code,
+    .team-badge.has-logo .badge-sport {
+      opacity: .18;
+    }
+
     .badge-sport,
     .badge-code {
       position: relative;
@@ -6425,11 +6448,16 @@
         pruneAutoMatches();
         (data.fixtures || []).forEach(fixture => {
           const existing = matches.find(match => match.id === fixture.id);
-          const date = new Date(fixture.startAt);
-          const time = `${date.getMonth() + 1}月${date.getDate()}日 ${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")} MYT`;
-          const markets = fixture.type === "nba"
-            ? nbaMarkets(fixture.probs?.[0] || .52, fixture.probs?.[1] || .48, fixture.spread || "-2.5", fixture.total || "219.5")
-            : footballMarkets(fixture.probs?.[0] || .46, fixture.probs?.[1] || .28, fixture.probs?.[2] || .26);
+          const time = formatMatchTime(fixture.startAt);
+          const markets = Array.isArray(fixture.markets) && fixture.markets.length
+            ? fixture.markets.map(market => ({
+              ...market,
+              odd: Number(market.odd || 1.01),
+              chance: Number(market.chance || 0.5)
+            }))
+            : fixture.type === "nba"
+              ? nbaMarkets(fixture.probs?.[0] || .52, fixture.probs?.[1] || .48, fixture.spread || "-2.5", fixture.total || "219.5")
+              : footballMarkets(fixture.probs?.[0] || .46, fixture.probs?.[1] || .28, fixture.probs?.[2] || .26);
           const nextMatch = {
             id: fixture.id,
             sport: fixture.sport,
@@ -6441,6 +6469,11 @@
             away: fixture.away,
             source: fixture.source || "Auto Board",
             auto: true,
+            venue: fixture.venue || "",
+            homeLogo: fixture.homeLogo || "",
+            awayLogo: fixture.awayLogo || "",
+            priority: Number(fixture.priority || 0),
+            ticket: fixture.ticket || (fixture.type === "other" ? "flow" : "ticket"),
             markets
           };
           if (existing) Object.assign(existing, nextMatch);
@@ -6479,7 +6512,7 @@
           id,
           sport: "世界杯",
           league: "FIFA World Cup Auto",
-          time: `${kickoff.getMonth() + 1}月${kickoff.getDate()}日 ${String(kickoff.getHours()).padStart(2, "0")}:00 MYT`,
+          time: formatMatchTime(kickoff.toISOString()),
           startAt: kickoff.toISOString(),
           endAt: new Date(kickoff.getTime() + 130 * 60 * 1000).toISOString(),
           home: pair[0],
@@ -6490,6 +6523,88 @@
         });
       });
       pruneAutoMatches();
+    }
+
+    function mytParts(value) {
+      const date = new Date(value || Date.now());
+      const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
+      const myt = new Date(utc + (8 * 60 * 60000));
+      return {
+        year: myt.getUTCFullYear(),
+        month: myt.getUTCMonth() + 1,
+        day: myt.getUTCDate(),
+        hour: myt.getUTCHours(),
+        minute: myt.getUTCMinutes()
+      };
+    }
+
+    function formatMatchTime(value) {
+      const p = mytParts(value);
+      return `${p.month}月${p.day}日 ${String(p.hour).padStart(2, "0")}:${String(p.minute).padStart(2, "0")} MYT`;
+    }
+
+    function matchStartTime(match) {
+      return new Date(match?.startAt || 0).getTime();
+    }
+
+    function dayStart(time) {
+      const p = mytParts(time);
+      return Date.UTC(p.year, p.month - 1, p.day);
+    }
+
+    function isTodayMatch(match) {
+      const start = matchStartTime(match);
+      if (!start) return false;
+      return dayStart(start) === dayStart(Date.now());
+    }
+
+    function isWithinDays(match, days) {
+      const start = matchStartTime(match);
+      if (!start) return false;
+      const diff = dayStart(start) - dayStart(Date.now());
+      return diff >= 0 && diff < days * DAY;
+    }
+
+    function isWorldCupMatch(match) {
+      return String(match?.sport || "") === "世界杯";
+    }
+
+    function matchSortScore(match) {
+      const start = matchStartTime(match);
+      const diffDays = Math.round((dayStart(start) - dayStart(Date.now())) / DAY);
+      const priority = Number(match.priority || 0);
+      const todayBoost = isTodayMatch(match) ? -500 : 0;
+      const wcBoost = isWorldCupMatch(match) && isWithinDays(match, 3) ? -900 : isWorldCupMatch(match) ? -250 : 0;
+      const nbaBoost = match.sport === "NBA" ? -120 : 0;
+      return priority + todayBoost + wcBoost + nbaBoost + diffDays * 8 + start / 1e11;
+    }
+
+    function sortMatchesSmart(list) {
+      return [...list].sort((a, b) => matchSortScore(a) - matchSortScore(b) || matchStartTime(a) - matchStartTime(b));
+    }
+
+    function todayMatches(list) {
+      return sortMatchesSmart(list.filter(isTodayMatch));
+    }
+
+    function worldCupMatches3Days(list) {
+      return sortMatchesSmart(list.filter(match => isWorldCupMatch(match) && isWithinDays(match, 3)));
+    }
+
+    function otherUpcomingMatches(list) {
+      return sortMatchesSmart(list.filter(match => !(isWorldCupMatch(match) && isWithinDays(match, 3))));
+    }
+
+    function buildHomeMatches(list) {
+      const today = todayMatches(list);
+      const rest = sortMatchesSmart(list.filter(match => !today.some(item => item.id === match.id)));
+      return [...today, ...rest];
+    }
+
+    function buildSportsMatches(list) {
+      const worldCup = worldCupMatches3Days(list);
+      const rest = sortMatchesSmart(list.filter(match => !worldCup.some(item => item.id === match.id)));
+      return [...worldCup, ...rest];
     }
 
     function scheduleServerSave() {
@@ -6890,19 +7005,22 @@
       const casinoSearchInput = document.getElementById("casinoSearch");
       if (casinoCount) casinoCount.textContent = `${casinoSearch ? "搜索结果" : "全部游戏"} ${casinoList.length} 个`;
       if (casinoSearchInput && casinoSearchInput.value !== casinoSearch) casinoSearchInput.value = casinoSearch;
-      const activeMatches = matches.filter(match => !match.endAt || Date.now() < new Date(match.endAt).getTime());
+      const activeMatches = sortMatchesSmart(matches.filter(match => !match.endAt || Date.now() < new Date(match.endAt).getTime()));
+      const orderedHomeMatches = buildHomeMatches(activeMatches);
+      const orderedSportsMatches = buildSportsMatches(activeMatches);
+      const todayCount = todayMatches(activeMatches).length;
       document.getElementById("liveGameCount").textContent = games.filter(game => game.playable).length;
       document.getElementById("liveMatchCount").textContent = activeMatches.length;
       renderHomeNews(activeMatches);
       renderActivityFeed(activeMatches);
       renderHomeOverview(activeMatches);
       renderLiveBoard(activeMatches);
-      renderMatches("homeMatches", activeMatches.slice(0, 3));
-      renderMatchShelf("homeMatchShelf", activeMatches.slice(0, 10));
-      renderMatchShelf("sportsFeatureShelf", activeMatches.slice(0, 8));
-      renderSportsTimeline(activeMatches);
+      renderMatches("homeMatches", orderedHomeMatches.slice(0, todayCount >= 4 ? todayCount : 4));
+      renderMatchShelf("homeMatchShelf", orderedHomeMatches.slice(0, 10));
+      renderMatchShelf("sportsFeatureShelf", orderedSportsMatches.slice(0, 8));
+      renderSportsTimeline(orderedSportsMatches);
       renderRecentGames();
-      renderMatches("sportsMatches", activeMatches.filter(m => sportFilter === "全部" || m.sport === sportFilter));
+      renderMatches("sportsMatches", orderedSportsMatches.filter(m => sportFilter === "全部" || m.sport === sportFilter));
       renderFilters();
       renderHistory();
       renderAccountRequests();
@@ -7298,11 +7416,15 @@
       const heat = document.getElementById("heatGrid");
       if (!ticker || !heat) return;
       const latestLog = state.logs.find(log => log.user === state.currentUser);
-      const firstMatch = activeMatches[0];
-      const nbaMatch = activeMatches.find(match => match.sport === "NBA");
-      const worldCup = activeMatches.find(match => match.sport === "世界杯");
+      const ordered = buildHomeMatches(activeMatches);
+      const firstMatch = ordered[0];
+      const nbaMatch = ordered.find(match => match.sport === "NBA");
+      const worldCup = ordered.find(match => match.sport === "世界杯");
+      const todayCount = todayMatches(activeMatches).length;
+      const worldCupCount = worldCupMatches3Days(activeMatches).length;
       const items = [
-        worldCup ? `世界杯 · ${worldCup.home} VS ${worldCup.away} · ${worldCup.markets.length} 个盘口` : "世界杯盘口等待上架",
+        worldCup ? `世界杯未来3天 · ${worldCupCount} 场 · 当前主推 ${worldCup.home} VS ${worldCup.away}` : "世界杯盘口等待上架",
+        todayCount ? `今天有 ${todayCount} 场赛事 · 首页优先显示今天全部比赛` : "今天暂无自动赛事",
         nbaMatch ? `NBA · ${nbaMatch.home} VS ${nbaMatch.away} · 胜负/让分/大小分` : "NBA 热门盘口准备中",
         `娱乐场 · ${games.filter(game => game.playable).length} 个游戏 · 牌桌/老虎机/创新`,
         latestLog ? `最近流水 · ${publicLogItem(latestLog.item)} · ${latestLog.status} ${latestLog.result > 0 ? "+" : ""}${fmt(latestLog.result)}` : "新号注册 0 分 · 可到我的页面申请积分",
@@ -7311,13 +7433,13 @@
       ticker.innerHTML = [...items, ...items].map(text => `<span>${text}</span>`).join("");
       const hotGames = ["baccarat", "blackjack", "thor", "runner"].map(id => games.find(game => game.id === id)).filter(Boolean);
       const cards = [
-        { label: "今日主推", title: firstMatch ? `${firstMatch.home} VS ${firstMatch.away}` : "等待赛事上架", meta: firstMatch ? `${firstMatch.sport} · ${firstMatch.markets.length} 盘口` : "自动更新" },
+        { label: "今日主推", title: firstMatch ? `${firstMatch.home} VS ${firstMatch.away}` : "等待赛事上架", meta: firstMatch ? `${firstMatch.sport} · ${firstMatch.markets.length} 盘口 · 今日 ${todayCount} 场` : "自动更新" },
         { label: "热门牌桌", title: hotGames[0]?.name || "百家乐", meta: "筹码下注 · 可撤销/加倍" },
         { label: "老虎机", title: hotGames[2]?.name || "雷神", meta: "5x5 掉落 · 自动转" },
-        { label: "创新游戏", title: hotGames[3]?.name || "爆点飞行", meta: "最低 0.5 · 最高 x1000" }
+        { label: "世界杯专区", title: worldCupCount ? `${worldCupCount} 场 3 天赛程` : "等待世界杯上架", meta: worldCup ? `${worldCup.home} VS ${worldCup.away}` : "自动更新真实赔率" }
       ];
       heat.innerHTML = cards.map(card => `
-        <button class="heat-card" ${card.title === hotGames[0]?.name ? 'data-game="baccarat"' : card.title === hotGames[2]?.name ? 'data-game="thor"' : card.title === hotGames[3]?.name ? 'data-game="runner"' : 'data-page="sports"'}>
+        <button class="heat-card" ${card.title === hotGames[0]?.name ? 'data-game="baccarat"' : card.title === hotGames[2]?.name ? 'data-game="thor"' : 'data-page="sports"'}>
           <span>${card.label}</span>
           <strong>${card.title}</strong>
           <b>${card.meta}</b>
@@ -7328,15 +7450,16 @@
     function renderActivityFeed(activeMatches) {
       const box = document.getElementById("activityTrack");
       if (!box) return;
+      const ordered = buildSportsMatches(activeMatches);
       const userLogs = state.logs.filter(log => log.user === state.currentUser).slice(0, 5).map(log => ({
         label: log.status || "流水",
         title: publicLogItem(log.item),
         meta: `${Number(log.result || 0) >= 0 ? "+" : ""}${fmt(log.result)} 积分`
       }));
-      const matchCards = activeMatches.slice(0, 3).map(match => ({
+      const matchCards = ordered.slice(0, 4).map(match => ({
         label: match.sport,
         title: `${match.home} VS ${match.away}`,
-        meta: `${match.markets.length} 盘口`
+        meta: `${match.markets.length} 盘口 · ${isTodayMatch(match) ? "今天" : "即将开赛"}`
       }));
       const gameCards = ["thor", "baccarat", "space-race", "darts", "runner"].map(id => games.find(game => game.id === id)).filter(Boolean).map(game => ({
         label: game.cat,
@@ -7357,6 +7480,7 @@
     function renderLiveBoard(activeMatches) {
       const box = document.getElementById("liveBoard");
       if (!box) return;
+      const ordered = buildSportsMatches(activeMatches);
       const userLogs = state.logs.filter(log => log.user === state.currentUser).slice(0, 4);
       const publicLogs = userLogs.length ? userLogs : state.logs.slice(0, 4);
       const logRows = publicLogs.length ? publicLogs.map(log => ({
@@ -7367,7 +7491,7 @@
         { text: "百家乐筹码台待开局", value: "闲/平/庄" },
         { text: "雷神 5x5 掉落机台", value: "0.25/拉" }
       ];
-      const topMatches = activeMatches.slice(0, 4).map(match => {
+      const topMatches = ordered.slice(0, 4).map(match => {
         const market = match.markets.find(item => item.group === "main") || match.markets[0];
         return {
           text: `${match.sport} · ${match.home} vs ${match.away}`,
@@ -7392,7 +7516,10 @@
       if (!box || !current) return;
       const openRows = (state.openBets || []).filter(bet => bet.user === current.name);
       const lockedStake = openRows.reduce((sum, bet) => sum + Number(bet.stake || 0), 0);
-      const topMatch = activeMatches.find(match => match.sport === "世界杯" || match.sport === "NBA") || activeMatches[0];
+      const ordered = buildHomeMatches(activeMatches);
+      const topMatch = ordered.find(match => match.sport === "世界杯" || match.sport === "NBA") || ordered[0];
+      const todayCount = todayMatches(activeMatches).length;
+      const worldCupCount = worldCupMatches3Days(activeMatches).length;
       const playable = games.filter(game => game.playable).length;
       box.innerHTML = `
         <div class="overview-card">
@@ -7400,8 +7527,8 @@
           <div class="overview-grid">
             <div class="overview-stat"><span>当前积分</span><strong>${fmt(current.balance)}</strong></div>
             <div class="overview-stat"><span>待结算单</span><strong>${openRows.length}</strong></div>
-            <div class="overview-stat"><span>锁定下注</span><strong>${fmt(lockedStake)}</strong></div>
-            <div class="overview-stat"><span>可玩游戏</span><strong>${playable}</strong></div>
+            <div class="overview-stat"><span>今日赛事</span><strong>${todayCount}</strong></div>
+            <div class="overview-stat"><span>世界杯3天</span><strong>${worldCupCount}</strong></div>
           </div>
         </div>
         <div class="overview-card">
@@ -7409,6 +7536,8 @@
           <div class="overview-grid">
             <div class="overview-stat"><span>主推赛事</span><strong>${topMatch ? `${topMatch.home} VS ${topMatch.away}` : "等待上架"}</strong></div>
             <div class="overview-stat"><span>盘口数量</span><strong>${topMatch ? topMatch.markets.length : 0}</strong></div>
+            <div class="overview-stat"><span>锁定下注</span><strong>${fmt(lockedStake)}</strong></div>
+            <div class="overview-stat"><span>可玩游戏</span><strong>${playable}</strong></div>
           </div>
           <div class="overview-actions">
             <button data-page="sports">体育赛事</button>
@@ -7473,15 +7602,21 @@
     }
 
     function renderMatches(target, list) {
-      document.getElementById(target).innerHTML = list.map(m => {
+      const host = document.getElementById(target);
+      if (!list.length) {
+        host.innerHTML = `<div class="ticket-empty">暂无可投注赛事</div>`;
+        return;
+      }
+      host.innerHTML = list.map(m => {
         const shownMarkets = m.markets.filter(market => expandedMatches[m.id] || market.group === "main");
         const hiddenCount = Math.max(0, m.markets.length - shownMarkets.length);
         const status = matchStatus(m);
         const insight = matchInsight(m);
+        const meta = m.venue ? `${m.league} · ${m.source} · ${m.venue}` : `${m.league} · ${m.source}`;
         return `
         <article class="match">
-          <div class="match-top"><span>${m.league} · ${m.source}</span><span>${m.time}</span><span class="match-status ${status.type}">${status.label}</span></div>
-          <div class="teams">${teamBadge(m.home, m.sport, "home")}<span>VS</span>${teamBadge(m.away, m.sport, "away")}</div>
+          <div class="match-top"><span>${meta}</span><span>${m.time}</span><span class="match-status ${status.type}">${status.label}</span></div>
+          <div class="teams">${teamBadge(m.home, m.sport, "home", m.homeLogo)}<span>VS</span>${teamBadge(m.away, m.sport, "away", m.awayLogo)}</div>
           ${matchClock(m)}
           ${matchBrief(m, insight, status)}
           <div class="match-insights">
@@ -7547,6 +7682,10 @@
     function renderMatchShelf(target, list) {
       const el = document.getElementById(target);
       el.classList.add("auto");
+      if (!list.length) {
+        el.innerHTML = `<div class="ticket-empty">暂无可展示赛事</div>`;
+        return;
+      }
       const doubled = [...list, ...list];
       el.innerHTML = `<div class="match-auto-track">${doubled.map(m => {
         const main = m.markets.filter(market => market.group === "main").slice(0, 2);
@@ -7556,11 +7695,12 @@
         const insight = matchInsight(m);
         const sampleReturn = Math.round(Number(primary.odd) * 1000);
         const settleMode = m.ticket === "flow" ? "进流水" : "进投注单";
+        const meta = m.venue ? `${m.source} · ${m.venue}` : m.source;
         return `
           <article class="match-card featured">
             <div class="match-top"><span class="league-chip">${m.sport} · ${m.league}</span><span class="match-status ${status.type}">${status.label}</span></div>
-            <div class="match-top"><span>${m.time}</span><span>${m.source}</span></div>
-            <div class="match-card-teams">${teamBadge(m.home, m.sport, "home")}<span>VS</span>${teamBadge(m.away, m.sport, "away")}</div>
+            <div class="match-top"><span>${m.time}</span><span>${meta}</span></div>
+            <div class="match-card-teams">${teamBadge(m.home, m.sport, "home", m.homeLogo)}<span>VS</span>${teamBadge(m.away, m.sport, "away", m.awayLogo)}</div>
             ${matchClock(m)}
             <div class="match-card-marketline"><span>${summary}</span><strong>${primary.label} x${primary.odd}</strong></div>
             <div class="match-card-statline"><span>主盘<strong>${main.length}</strong></span><span>全部盘口<strong>${m.markets.length}</strong></span><span>概率<strong>${primary.chance ? Math.round(primary.chance * 100) + "%" : "系统"}</strong></span></div>
@@ -7574,18 +7714,16 @@
     function renderSportsTimeline(list) {
       const box = document.getElementById("sportsTimeline");
       if (!box) return;
-      const rows = [...list]
-        .sort((a, b) => new Date(a.startAt || 0).getTime() - new Date(b.startAt || 0).getTime())
-        .slice(0, 6);
+      const rows = buildSportsMatches(list).slice(0, 8);
       box.innerHTML = rows.length ? rows.map(match => {
         const status = matchStatus(match);
-        const settle = match.ticket === "flow" ? "进流水" : "进投注单";
         const time = match.time.replace(" MYT", "");
+        const note = isWorldCupMatch(match) && isWithinDays(match, 3) ? "世界杯3天重点" : isTodayMatch(match) ? "今日赛程" : match.ticket === "flow" ? "进流水" : "进投注单";
         return `
           <button class="timeline-item" data-page="sports" data-sport="${match.sport}">
             <span class="timeline-time">${time}</span>
             <span class="timeline-main"><strong>${match.home} VS ${match.away}</strong><span>${match.sport} · ${match.league}</span></span>
-            <span class="timeline-tail">${status.label}<br>${match.markets.length}盘口 · ${settle}</span>
+            <span class="timeline-tail">${status.label}<br>${note} · ${match.markets.length}盘口</span>
           </button>
         `;
       }).join("") : `<div class="ticket-empty">暂无可投注赛程</div>`;
@@ -7616,14 +7754,15 @@
       return { type: "soon", label: `${Math.ceil(hours / 24)}天后` };
     }
 
-    function teamBadge(name, sport, side) {
+    function teamBadge(name, sport, side, logo = "") {
       const palette = badgePalette(name);
       const icon = sportIcon(sport);
       const label = teamShort(name);
+      const logoTag = logo ? `<img class="team-badge-logo" src="${logo}" alt="${name}">` : "";
       return `
         <span class="team-with-badge ${side === "away" ? "away" : ""}">
           ${side === "away" ? `<span class="team-name">${name}</span>` : ""}
-          <span class="team-badge" style="--badge-a:${palette[0]};--badge-b:${palette[1]};"><span class="badge-ring"></span><span class="badge-homeaway">${side === "away" ? "客" : "主"}</span><span class="badge-sport">${icon}</span><span class="badge-code">${label}</span><span class="badge-stripe"></span></span>
+          <span class="team-badge ${logo ? "has-logo" : ""}" style="--badge-a:${palette[0]};--badge-b:${palette[1]};">${logoTag}<span class="badge-ring"></span><span class="badge-homeaway">${side === "away" ? "客" : "主"}</span><span class="badge-sport">${icon}</span><span class="badge-code">${label}</span><span class="badge-stripe"></span></span>
           ${side !== "away" ? `<span class="team-name">${name}</span>` : ""}
         </span>`;
     }
@@ -7743,7 +7882,7 @@
             <div class="ticket-card">
               <div class="ticket-top"><span>${league} · ${timeFmt(bet.time)}</span><span class="ticket-status">${status.label}</span></div>
               <div class="ticket-main"><b>${bet.item}</b></div>
-              ${match ? `<div class="ticket-versus">${teamBadge(match.home, match.sport, "home")}<span>VS</span>${teamBadge(match.away, match.sport, "away")}</div>` : ""}
+              ${match ? `<div class="ticket-versus">${teamBadge(match.home, match.sport, "home", match.homeLogo)}<span>VS</span>${teamBadge(match.away, match.sport, "away", match.awayLogo)}</div>` : ""}
               <div class="ticket-progress" title="赛事进度"><i style="--ticket-progress:${progress}%"></i></div>
               ${ticketTimeline(bet, match)}
               <div class="ticket-meta">
@@ -7820,7 +7959,9 @@
       const userTickets = (state.openBets || []).filter(bet => bet.user === state.currentUser);
       const topOdd = activeMatches.flatMap(match => match.markets.map(market => ({ match, market })))
         .sort((a, b) => Number(b.market.odd) - Number(a.market.odd))[0];
-      const nextMatch = [...activeMatches].sort((a, b) => new Date(a.startAt).getTime() - new Date(b.startAt).getTime())[0];
+      const nextMatch = buildSportsMatches(activeMatches)[0];
+      const todayCount = todayMatches(activeMatches).length;
+      const worldCupCount = worldCupMatches3Days(activeMatches).length;
       const sportsCount = new Set(activeMatches.map(match => match.sport)).size;
       box.innerHTML = `
         <button class="sports-overview-card" data-page="sports">
@@ -7830,10 +7971,13 @@
           <span>世界杯 / NBA 待结算</span><strong>${userTickets.length}</strong><small>${ticketMatches.length} 场进投注单</small>
         </button>
         <button class="sports-overview-card" data-page="sports">
-          <span>最高回报率</span><strong>x${topOdd ? topOdd.market.odd : "0"}</strong><small>${topOdd ? `${topOdd.match.home} vs ${topOdd.match.away}` : "等待盘口"}</small>
+          <span>今日赛事</span><strong>${todayCount}</strong><small>首页优先显示今天全部比赛</small>
         </button>
         <button class="sports-overview-card" data-page="sports">
-          <span>下一场</span><strong>${nextMatch ? nextMatch.time.split(" ")[0] : "--"}</strong><small>${nextMatch ? `${nextMatch.home} vs ${nextMatch.away}` : "暂无赛程"}</small>
+          <span>世界杯3天</span><strong>${worldCupCount}</strong><small>${nextMatch ? `${nextMatch.home} vs ${nextMatch.away}` : "暂无赛程"}</small>
+        </button>
+        <button class="sports-overview-card" data-page="sports">
+          <span>最高回报率</span><strong>x${topOdd ? topOdd.market.odd : "0"}</strong><small>${topOdd ? `${topOdd.match.home} vs ${topOdd.match.away}` : "等待盘口"}</small>
         </button>
       `;
     }
@@ -7846,11 +7990,12 @@
       const stake7 = logs.reduce((sum, log) => sum + Number(log.stake || 0), 0);
       const openRows = (state.openBets || []).filter(bet => bet.user === state.currentUser);
       const locked = openRows.reduce((sum, bet) => sum + Number(bet.stake || 0), 0);
-      const nextMatch = [...activeMatches].sort((a, b) => new Date(a.startAt || 0) - new Date(b.startAt || 0))[0];
+      const nextMatch = buildSportsMatches(activeMatches)[0];
+      const todayCount = todayMatches(activeMatches).length;
       box.innerHTML = `
         <button class="menu-status-card" data-page="bets"><span>7天流水</span><strong>${fmt(stake7)}</strong><small>保留最近 7 天记录</small></button>
         <button class="menu-status-card" data-page="bets"><span>待结算锁定</span><strong>${fmt(locked)}</strong><small>世界杯 / NBA 完场结算</small></button>
-        <button class="menu-status-card" data-page="sports"><span>下一场赛事</span><strong>${nextMatch ? nextMatch.time.replace(" MYT", "") : "暂无"}</strong><small>${nextMatch ? nextMatch.home + " vs " + nextMatch.away : "自动上架/下架"}</small></button>
+        <button class="menu-status-card" data-page="sports"><span>今天赛事</span><strong>${todayCount}</strong><small>${nextMatch ? nextMatch.home + " vs " + nextMatch.away : "自动上架/下架"}</small></button>
         <button class="menu-status-card" data-page="account"><span>账户积分</span><strong>${fmt(current?.balance || 0)}</strong><small>注册 0 分，可申请积分</small></button>
         <button class="menu-status-card" data-whatsapp="60178541111"><span>客服</span><strong>0178541111</strong><small>WhatsApp 处理积分申请</small></button>
         <button class="menu-status-card" data-page="casino"><span>可玩游戏</span><strong>${games.filter(game => game.playable).length}</strong><small>牌桌 / 转轴 / 街机</small></button>
@@ -7864,10 +8009,13 @@
       const openRows = (state.openBets || []).filter(bet => bet.user === state.currentUser);
       const requests = (state.requests || []).filter(req => req.user === state.currentUser);
       const pendingRequests = requests.filter(req => !req.status || req.status === "待处理" || req.status === "待审核").length;
+      const todayCount = todayMatches(activeMatches).length;
+      const worldCupCount = worldCupMatches3Days(activeMatches).length;
       box.innerHTML = `
         <button data-page="casino"><span>可玩游戏</span><strong>${playable}</strong><small>牌桌 / 老虎 / 街机</small></button>
-        <button data-page="sports"><span>上架赛事</span><strong>${activeMatches.length}</strong><small>世界杯、NBA、电竞</small></button>
+        <button data-page="sports"><span>今日赛事</span><strong>${todayCount}</strong><small>首页优先显示</small></button>
         <button data-page="bets"><span>待结算单</span><strong>${openRows.length}</strong><small>世界杯 / NBA 赛后结算</small></button>
+        <button data-page="sports"><span>世界杯3天</span><strong>${worldCupCount}</strong><small>重点自动更新赔率</small></button>
         <button data-page="account"><span>积分申请</span><strong>${pendingRequests}</strong><small>客服审核发放</small></button>
       `;
     }
