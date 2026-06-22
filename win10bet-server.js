@@ -13,10 +13,13 @@ const STATE_FILE = path.join(DATA_DIR, "win10bet-shared-state.json");
 const DAY = 24 * 60 * 60 * 1000;
 
 const text = {
-  accountRequired: "\u8bf7\u8f93\u5165\u8d26\u53f7",
-  badPassword: "\u5bc6\u7801\u81f3\u5c114\u4e2a\u5b57\u6bcd\u6216\u53f7\u7801",
-  duplicate: "\u8fd9\u4e2a\u8d26\u53f7\u5df2\u7ecf\u5728\u4e86",
-  badLogin: "\u7528\u6237\u540d\u6216\u5bc6\u7801\u9519\u8bef",
+  accountRequired: "\u8bf7\u8f93\u5165\u624b\u673a\u53f7",
+  badPassword: "\u5bc6\u7801\u81f3\u5c116\u4f4d\u6570\u5b57",
+  duplicate: "\u8fd9\u4e2a\u624b\u673a\u53f7\u5df2\u7ecf\u6ce8\u518c",
+  badLogin: "\u624b\u673a\u53f7\u6216\u5bc6\u7801\u9519\u8bef",
+  badPhone: "\u8bf7\u8f93\u5165\u6b63\u786e\u624b\u673a\u53f7",
+  captchaRequired: "\u8bf7\u5b8c\u6210\u4eba\u673a\u9a8c\u8bc1",
+  captchaWrong: "\u4eba\u673a\u9a8c\u8bc1\u9519\u8bef",
   userMissing: "\u627e\u4e0d\u5230\u8fd9\u4e2a\u7528\u6237",
   requestMissing: "\u627e\u4e0d\u5230\u8fd9\u4e2a\u7533\u8bf7",
   betMissing: "\u627e\u4e0d\u5230\u8fd9\u5f20\u5f85\u7ed3\u7b97\u5355",
@@ -207,7 +210,19 @@ function readJson(req) {
 }
 
 function validPassword(pass) {
-  return /^[A-Za-z0-9]{4,}$/.test(pass);
+  return /^\d{6,}$/.test(pass);
+}
+
+function validPhone(phone) {
+  return /^01\d{8,9}$/.test(phone);
+}
+
+function validCaptcha(question, answer) {
+  const q = String(question || "").trim();
+  const a = String(answer || "").trim();
+  const match = q.match(/^(\d+)\s*\+\s*(\d+)$/);
+  if (!match) return false;
+  return String(Number(match[1]) + Number(match[2])) === a;
 }
 
 function ymd(date) {
@@ -490,10 +505,11 @@ const server = http.createServer(async (req, res) => {
       const name = String(body.name || "").trim();
       const pass = String(body.pass || "").trim();
       if (!name) return json(res, 400, { ok: false, message: text.accountRequired });
+      if (!validPhone(name)) return json(res, 400, { ok: false, message: text.badPhone });
       if (!validPassword(pass)) return json(res, 400, { ok: false, message: text.badPassword });
       const state = readState();
       if (state.users[name]) return json(res, 409, { ok: false, message: text.duplicate });
-      state.users[name] = { name, pass, balance: 0, createdAt: now() };
+      state.users[name] = { name, phone: name, pass, balance: 0, createdAt: now() };
       addLog(state, name, text.registerLog, 0, 0, text.register);
       return json(res, 200, { ok: true, currentUser: name, state: writeState(state) });
     }
@@ -501,6 +517,14 @@ const server = http.createServer(async (req, res) => {
       const body = await readJson(req);
       const name = String(body.name || "").trim();
       const pass = String(body.pass || "").trim();
+      const captchaQuestion = String(body.captchaQuestion || "").trim();
+      const captchaAnswer = String(body.captchaAnswer || "").trim();
+      if (!captchaQuestion || !captchaAnswer) {
+        return json(res, 400, { ok: false, message: text.captchaRequired });
+      }
+      if (!validCaptcha(captchaQuestion, captchaAnswer)) {
+        return json(res, 400, { ok: false, message: text.captchaWrong });
+      }
       const state = readState();
       if (!state.users[name] || state.users[name].pass !== pass) {
         return json(res, 401, { ok: false, message: text.badLogin });

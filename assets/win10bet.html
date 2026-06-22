@@ -5653,12 +5653,20 @@
         <button class="tab" id="registerTab">注册</button>
       </div>
       <div class="field">
-        <label for="authName">用户名</label>
-        <input id="authName" maxlength="18" autocomplete="username" placeholder="输入注册名字">
+        <label for="authName">手机号</label>
+        <input id="authName" maxlength="11" inputmode="numeric" autocomplete="username" placeholder="输入手机号">
       </div>
       <div class="field">
         <label for="authPass">密码</label>
-        <input id="authPass" type="password" maxlength="24" autocomplete="current-password" placeholder="输入密码">
+        <input id="authPass" type="password" maxlength="12" inputmode="numeric" autocomplete="current-password" placeholder="输入至少6位数字密码">
+      </div>
+      <div class="field" id="captchaField">
+        <label for="authCaptcha">人机验证</label>
+        <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;">
+          <input id="authCaptcha" maxlength="4" inputmode="numeric" placeholder="输入答案">
+          <button class="secondary" id="refreshCaptcha" type="button">刷新</button>
+        </div>
+        <div class="muted" id="captchaQuestion" style="font-size:12px;">1 + 1 = ?</div>
       </div>
       <button class="primary" id="authSubmit">登录</button>
       <p class="muted" id="authHint" style="margin-top:12px;">首次使用请切换到注册。新账号积分为 0，需要申请积分后由客服审核发放。</p>
@@ -6253,6 +6261,7 @@
     let state = load();
     let authMode = "login";
     let selectedBet = null;
+    let captchaState = { a: 1, b: 1 };
     let sportFilter = "全部";
     let casinoFilter = "全部";
     let casinoSearch = "";
@@ -6491,7 +6500,24 @@
     }
 
     function isValidPassword(pass) {
-      return /^[A-Za-z0-9]{4,}$/.test(pass);
+      return /^\d{6,}$/.test(pass);
+    }
+
+    function isValidPhone(phone) {
+      return /^01\d{8,9}$/.test(phone);
+    }
+
+    function buildCaptchaQuestion() {
+      return `${captchaState.a} + ${captchaState.b}`;
+    }
+
+    function refreshCaptcha() {
+      captchaState = {
+        a: Math.floor(Math.random() * 8) + 1,
+        b: Math.floor(Math.random() * 8) + 1
+      };
+      document.getElementById("captchaQuestion").textContent = `${buildCaptchaQuestion()} = ?`;
+      document.getElementById("authCaptcha").value = "";
     }
 
     function load() {
@@ -6523,43 +6549,60 @@
       document.getElementById("loginTab").classList.toggle("active", mode === "login");
       document.getElementById("registerTab").classList.toggle("active", mode === "register");
       document.getElementById("authSubmit").textContent = mode === "login" ? "登录" : "注册";
-      document.getElementById("authHint").textContent = mode === "login" ? "首次使用请切换到注册。新账号积分为 0，需要申请积分后由客服审核发放。" : "注册后自动进入大厅，后续可在我的页面申请积分。";
+      document.getElementById("authHint").textContent = mode === "login" ? "登录必须完成人机验证。请使用手机号和至少6位数字密码登录。" : "注册请使用手机号，密码至少6位数字。短信验证码暂未接入。";
+      document.getElementById("captchaField").style.display = mode === "login" ? "grid" : "none";
+      refreshCaptcha();
     }
 
     async function handleAuth() {
       const name = document.getElementById("authName").value.trim();
       const pass = document.getElementById("authPass").value.trim();
-      if (!name || !pass) return showToast("请输入用户名和密码");
-      if (!isValidPassword(pass)) return showToast("密码至少4个字母或号码");
+      const captchaAnswer = document.getElementById("authCaptcha").value.trim();
+      const captchaQuestion = buildCaptchaQuestion();
+      if (!name || !pass) return showToast("请输入手机号和密码");
+      if (!isValidPhone(name)) return showToast("请输入正确手机号");
+      if (!isValidPassword(pass)) return showToast("密码至少6位数字");
+      if (authMode === "login") {
+        if (!captchaAnswer) return showToast("请完成人机验证");
+        if (String(captchaState.a + captchaState.b) !== captchaAnswer) {
+          refreshCaptcha();
+          return showToast("人机验证错误");
+        }
+      }
       if (API_ENABLED) {
         try {
           const data = await apiFetch(authMode === "register" ? "/api/register" : "/api/login", {
             method: "POST",
-            body: JSON.stringify({ name, pass })
+            body: JSON.stringify({ name, pass, captchaQuestion, captchaAnswer })
           });
           localStorage.setItem(SESSION_KEY, data.currentUser || name);
           state = normalizeState(data.state, data.currentUser || name);
           localStorage.setItem(STORE_KEY, JSON.stringify(state));
+          refreshCaptcha();
           enterMain();
           return;
         } catch (error) {
-          if (error.message === "这个账号已经在了") return showToast("这个账号已经在了");
+          if (error.message === "这个手机号已经注册") return showToast("这个手机号已经注册");
           if (error.message && error.message !== "api offline" && API_ENABLED && apiOnline) return showToast(error.message);
           apiOnline = false;
         }
       }
       if (authMode === "register") {
-        if (state.users[name]) return showToast("这个账号已经在了");
-        state.users[name] = { name, pass, balance: 0, createdAt: now() };
+        if (state.users[name]) return showToast("这个手机号已经注册");
+        state.users[name] = { name, phone: name, pass, balance: 0, createdAt: now() };
         state.currentUser = name;
         localStorage.setItem(SESSION_KEY, name);
         addLog(name, "注册账号", 0, 0, "注册");
       } else {
-        if (!state.users[name] || state.users[name].pass !== pass) return showToast("用户名或密码错误");
+        if (!state.users[name] || state.users[name].pass !== pass) {
+          refreshCaptcha();
+          return showToast("手机号或密码错误");
+        }
         state.currentUser = name;
         localStorage.setItem(SESSION_KEY, name);
       }
       save();
+      refreshCaptcha();
       enterMain();
     }
 
@@ -9601,6 +9644,7 @@
       if (target.id === "loginTab") setAuthMode("login");
       if (target.id === "registerTab") setAuthMode("register");
       if (target.id === "authSubmit") handleAuth();
+      if (target.id === "refreshCaptcha") refreshCaptcha();
       if (target.dataset.page) {
         if (target.dataset.sport) sportFilter = target.dataset.sport;
         nav(target.dataset.page);
