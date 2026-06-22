@@ -226,7 +226,7 @@ function readJson(req) {
 }
 
 function validPassword(pass) {
-  return /^\d{6,}$/.test(pass);
+  return String(pass || "").trim().length >= 6;
 }
 
 function normalizeEmail(email) {
@@ -286,10 +286,16 @@ function remapUserLookupMap(map = {}) {
 
 function validCaptcha(question, answer) {
   const q = String(question || "").trim();
-  const a = String(answer || "").trim();
-  const match = q.match(/^(\d+)\s*\+\s*(\d+)$/);
-  if (!match) return false;
-  return String(Number(match[1]) + Number(match[2])) === a;
+  const a = String(answer || "").trim().toLowerCase();
+  const pairs = {
+    "选择下面不是水果的那个词": "篮球",
+    "选择一种交通工具": "火车",
+    "哪一个是颜色": "蓝色",
+    "哪一个可以在天上飞": "飞机",
+    "哪一个属于动物": "老虎",
+    "哪一个通常在厨房里": "冰箱"
+  };
+  return pairs[q] ? a === pairs[q].toLowerCase() : false;
 }
 
 function hasWhatsappVerify() {

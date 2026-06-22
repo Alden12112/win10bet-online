@@ -5827,7 +5827,7 @@
       </div>
       <div class="field">
         <label for="authPass">密码</label>
-        <input id="authPass" type="password" maxlength="12" inputmode="numeric" autocomplete="current-password" placeholder="输入至少6位数字密码">
+        <input id="authPass" type="password" maxlength="20" autocomplete="current-password" placeholder="输入至少6位密码，可用字母和数字">
       </div>
       <div class="field" id="captchaField">
         <label for="authCaptcha">人机验证</label>
@@ -5835,7 +5835,7 @@
           <input id="authCaptcha" maxlength="4" inputmode="numeric" placeholder="输入答案">
           <button class="secondary" id="refreshCaptcha" type="button">刷新</button>
         </div>
-        <div class="muted" id="captchaQuestion" style="font-size:12px;">1 + 1 = ?</div>
+        <div class="muted" id="captchaQuestion" style="font-size:12px;">请选择正确答案</div>
       </div>
       <button class="primary" id="authSubmit">登录</button>
       <div class="auth-actions">
@@ -6435,7 +6435,7 @@
     let authMode = "login";
     let authFlow = "login";
     let selectedBet = null;
-    let captchaState = { a: 1, b: 1 };
+    let captchaState = { question: "", answer: "", options: [] };
     let sportFilter = "全部";
     let casinoFilter = "全部";
     let casinoSearch = "";
@@ -6767,7 +6767,7 @@
     }
 
     function isValidPassword(pass) {
-      return /^\d{6,}$/.test(pass);
+      return String(pass || "").trim().length >= 6;
     }
 
     function normalizePhone(phone) {
@@ -6821,16 +6821,17 @@
       return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeEmail(email));
     }
 
-    function buildCaptchaQuestion() {
-      return `${captchaState.a} + ${captchaState.b}`;
-    }
-
     function refreshCaptcha() {
-      captchaState = {
-        a: Math.floor(Math.random() * 8) + 1,
-        b: Math.floor(Math.random() * 8) + 1
-      };
-      document.getElementById("captchaQuestion").textContent = `${buildCaptchaQuestion()} = ?`;
+      const challenges = [
+        { question: "选择下面不是水果的那个词", answer: "篮球", options: ["苹果", "葡萄", "篮球"] },
+        { question: "选择一种交通工具", answer: "火车", options: ["火车", "枕头", "窗帘"] },
+        { question: "哪一个是颜色", answer: "蓝色", options: ["蓝色", "桌子", "面包"] },
+        { question: "哪一个可以在天上飞", answer: "飞机", options: ["飞机", "沙发", "鞋子"] },
+        { question: "哪一个属于动物", answer: "老虎", options: ["老虎", "杯子", "电灯"] },
+        { question: "哪一个通常在厨房里", answer: "冰箱", options: ["冰箱", "枕头", "草地"] }
+      ];
+      captchaState = challenges[Math.floor(Math.random() * challenges.length)];
+      document.getElementById("captchaQuestion").textContent = `${captchaState.question}：${captchaState.options.join(" / ")}`;
       document.getElementById("authCaptcha").value = "";
     }
 
@@ -6864,7 +6865,7 @@
       document.getElementById("loginTab").classList.toggle("active", mode === "login");
       document.getElementById("registerTab").classList.toggle("active", mode === "register");
       document.getElementById("authSubmit").textContent = mode === "login" ? "登录" : "注册";
-      document.getElementById("authHint").textContent = mode === "login" ? "登录请使用手机号和至少6位数字密码。登录时需要完成人机验证。" : "注册请填写手机号、确认手机号、邮箱和密码。邮箱用于找回密码。";
+      document.getElementById("authHint").textContent = mode === "login" ? "登录请使用手机号和至少6位字符密码。登录时需要完成人机验证。" : "注册请填写手机号、确认手机号、邮箱和密码。密码最少6个字符，邮箱用于找回密码。";
       document.getElementById("authSecondaryHint").textContent = mode === "login" ? "登录时请完成人机验证。" : "注册不收验证码，邮箱用于找回密码。";
       document.getElementById("captchaField").style.display = "grid";
       document.getElementById("confirmPhoneField").style.display = mode === "register" ? "grid" : "none";
@@ -6881,7 +6882,7 @@
       document.getElementById("loginTab").classList.add("active");
       document.getElementById("registerTab").classList.remove("active");
       document.getElementById("authSubmit").textContent = "重设密码";
-      document.getElementById("authHint").textContent = "输入注册时绑定的手机号和邮箱，再设置新密码。";
+      document.getElementById("authHint").textContent = "输入注册时绑定的手机号和邮箱，再设置新密码。密码最少6个字符。";
       document.getElementById("authSecondaryHint").textContent = "找回密码时同样需要完成人机验证。";
       document.getElementById("captchaField").style.display = "grid";
       document.getElementById("confirmPhoneField").style.display = "none";
@@ -6897,13 +6898,13 @@
       const email = normalizeEmail(document.getElementById("authEmail").value.trim());
       const pass = document.getElementById("authPass").value.trim();
       const captchaAnswer = document.getElementById("authCaptcha").value.trim();
-      const captchaQuestion = buildCaptchaQuestion();
+      const captchaQuestion = captchaState.question;
       if (!name || !pass) return showToast("请输入手机号和密码");
       if (!isValidPhone(name)) return showToast("请输入正确手机号");
       document.getElementById("authName").value = name;
-      if (!isValidPassword(pass)) return showToast("密码至少6位数字");
+      if (!isValidPassword(pass)) return showToast("密码至少6个字符");
       if (!captchaAnswer) return showToast("请完成人机验证");
-      if (String(captchaState.a + captchaState.b) !== captchaAnswer) {
+      if (String(captchaAnswer).trim().toLowerCase() !== String(captchaState.answer || "").trim().toLowerCase()) {
         refreshCaptcha();
         return showToast("人机验证错误");
       }
