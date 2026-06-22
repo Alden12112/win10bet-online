@@ -17,12 +17,17 @@ const DAY = 24 * 60 * 60 * 1000;
 
 const text = {
   accountRequired: "\u8bf7\u8f93\u5165\u624b\u673a\u53f7",
+  emailRequired: "\u8bf7\u8f93\u5165\u90ae\u7bb1",
+  badEmail: "\u8bf7\u8f93\u5165\u6b63\u786e\u90ae\u7bb1",
   badPassword: "\u5bc6\u7801\u81f3\u5c116\u4f4d\u6570\u5b57",
   duplicate: "\u8fd9\u4e2a\u624b\u673a\u53f7\u5df2\u7ecf\u6ce8\u518c",
   badLogin: "\u624b\u673a\u53f7\u6216\u5bc6\u7801\u9519\u8bef",
   badPhone: "\u8bf7\u8f93\u5165\u6b63\u786e\u624b\u673a\u53f7",
   captchaRequired: "\u8bf7\u5b8c\u6210\u4eba\u673a\u9a8c\u8bc1",
   captchaWrong: "\u4eba\u673a\u9a8c\u8bc1\u9519\u8bef",
+  emailMismatch: "\u624b\u673a\u53f7\u4e0e\u90ae\u7bb1\u4e0d\u5339\u914d",
+  resetPasswordLog: "\u90ae\u7bb1\u627e\u56de\u5bc6\u7801",
+  resetPassword: "\u627e\u56de\u5bc6\u7801",
   codeRequired: "\u8bf7\u8f93\u5165 WhatsApp \u9a8c\u8bc1\u7801",
   whatsappUnavailable: "WhatsApp \u9a8c\u8bc1\u672a\u914d\u7f6e",
   whatsappSendFailed: "WhatsApp \u53d1\u9001\u5931\u8d25",
@@ -224,6 +229,14 @@ function validPassword(pass) {
   return /^\d{6,}$/.test(pass);
 }
 
+function normalizeEmail(email) {
+  return String(email || "").trim().toLowerCase();
+}
+
+function validEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeEmail(email));
+}
+
 function normalizePhone(phone) {
   const cleaned = String(phone || "").replace(/\D/g, "");
   if (/^60\d{9,10}$/.test(cleaned)) return cleaned;
@@ -247,7 +260,8 @@ function normalizeUserMap(users = {}) {
     next[normalizedKey] = {
       ...entry,
       name: normalizedKey,
-      phone: normalizePhone(entry?.phone || entry?.name || key) || normalizedKey
+      phone: normalizePhone(entry?.phone || entry?.name || key) || normalizedKey,
+      email: normalizeEmail(entry?.email || "")
     };
   }
   return next;
@@ -942,14 +956,45 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "POST" && url.pathname === "/api/register") {
       const body = await readJson(req);
       const name = normalizePhone(body.name || "");
+      const email = normalizeEmail(body.email || "");
       const pass = String(body.pass || "").trim();
       if (!name) return json(res, 400, { ok: false, message: text.badPhone });
+      if (!email) return json(res, 400, { ok: false, message: text.emailRequired });
+      if (!validEmail(email)) return json(res, 400, { ok: false, message: text.badEmail });
       if (!validPassword(pass)) return json(res, 400, { ok: false, message: text.badPassword });
       const state = readState();
       if (state.users[name]) return json(res, 409, { ok: false, message: text.duplicate });
-      state.users[name] = { name, phone: name, pass, balance: 0, createdAt: now() };
+      state.users[name] = { name, phone: name, email, pass, balance: 0, createdAt: now() };
       addLog(state, name, text.registerLog, 0, 0, text.register);
       return json(res, 200, { ok: true, currentUser: name, state: writeState(state) });
+    }
+    if (req.method === "POST" && url.pathname === "/api/password-reset") {
+      const body = await readJson(req);
+      const name = normalizePhone(body.name || "");
+      const email = normalizeEmail(body.email || "");
+      const pass = String(body.pass || "").trim();
+      const captchaQuestion = String(body.captchaQuestion || "").trim();
+      const captchaAnswer = String(body.captchaAnswer || "").trim();
+      if (!name) return json(res, 400, { ok: false, message: text.badPhone });
+      if (!email) return json(res, 400, { ok: false, message: text.emailRequired });
+      if (!validEmail(email)) return json(res, 400, { ok: false, message: text.badEmail });
+      if (!validPassword(pass)) return json(res, 400, { ok: false, message: text.badPassword });
+      if (!captchaQuestion || !captchaAnswer) {
+        return json(res, 400, { ok: false, message: text.captchaRequired });
+      }
+      if (!validCaptcha(captchaQuestion, captchaAnswer)) {
+        return json(res, 400, { ok: false, message: text.captchaWrong });
+      }
+      const state = readState();
+      if (!state.users[name]) {
+        return json(res, 404, { ok: false, message: text.userMissing });
+      }
+      if (normalizeEmail(state.users[name].email || "") !== email) {
+        return json(res, 400, { ok: false, message: text.emailMismatch });
+      }
+      state.users[name].pass = pass;
+      addLog(state, name, text.resetPasswordLog, 0, 0, text.resetPassword);
+      return json(res, 200, { ok: true, currentUser: "", state: writeState(state) });
     }
     if (req.method === "POST" && url.pathname === "/api/login") {
       const body = await readJson(req);

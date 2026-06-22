@@ -338,6 +338,22 @@
       font-size: 13px;
     }
 
+    .auth-actions {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    .text-button {
+      padding: 0;
+      background: transparent;
+      color: var(--brand);
+      font-weight: 700;
+      font-size: 13px;
+    }
+
     input, select {
       width: 100%;
       min-height: 44px;
@@ -5791,7 +5807,7 @@
     <section class="card auth-card">
       <div class="auth-topline">
         <div class="auth-badge">马来西亚号码已开启</div>
-        <div class="auth-mini-note">支持 WhatsApp 注册验证</div>
+        <div class="auth-mini-note">手机号确认后即可注册</div>
       </div>
       <div class="tabs">
         <button class="tab active" id="loginTab">登录</button>
@@ -5800,6 +5816,14 @@
       <div class="field">
         <label for="authName">手机号</label>
         <input id="authName" maxlength="14" inputmode="tel" autocomplete="username" placeholder="输入手机号，例如 60178541111">
+      </div>
+      <div class="field" id="confirmPhoneField" style="display:none;">
+        <label for="authNameConfirm">确认手机号</label>
+        <input id="authNameConfirm" maxlength="14" inputmode="tel" autocomplete="off" placeholder="再次输入同一个手机号">
+      </div>
+      <div class="field" id="emailField" style="display:none;">
+        <label for="authEmail">邮箱</label>
+        <input id="authEmail" type="email" maxlength="80" inputmode="email" autocomplete="email" placeholder="输入找回密码要用的邮箱">
       </div>
       <div class="field">
         <label for="authPass">密码</label>
@@ -5813,15 +5837,11 @@
         </div>
         <div class="muted" id="captchaQuestion" style="font-size:12px;">1 + 1 = ?</div>
       </div>
-      <div class="field" id="registerCodeField" style="display:none;">
-        <label for="authCode">WhatsApp 验证码</label>
-        <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;">
-          <input id="authCode" maxlength="8" inputmode="numeric" placeholder="输入收到的验证码">
-          <button class="secondary" id="sendWhatsappCode" type="button">发送验证码</button>
-        </div>
-        <div class="muted" id="registerCodeHint" style="font-size:12px;">注册时可通过 WhatsApp 收码，支持 017、60 或 +60 开头号码。未配置时也可直接注册。</div>
-      </div>
       <button class="primary" id="authSubmit">登录</button>
+      <div class="auth-actions">
+        <span class="muted" id="authSecondaryHint">登录时请完成人机验证。</span>
+        <button class="text-button" id="forgotPassBtn" type="button">忘记密码</button>
+      </div>
       <p class="muted" id="authHint" style="margin-top:12px;">首次使用请切换到注册。新账号积分为 0，需要申请积分后由客服审核发放。</p>
     </section>
     <div class="auth-support"><span>客服 WhatsApp</span><strong>0178541111</strong></div>
@@ -6413,9 +6433,9 @@
 
     let state = load();
     let authMode = "login";
+    let authFlow = "login";
     let selectedBet = null;
     let captchaState = { a: 1, b: 1 };
-    let whatsappCodeSent = false;
     let sportFilter = "全部";
     let casinoFilter = "全部";
     let casinoSearch = "";
@@ -6793,6 +6813,14 @@
       return next;
     }
 
+    function normalizeEmail(email) {
+      return String(email || "").trim().toLowerCase();
+    }
+
+    function isValidEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizeEmail(email));
+    }
+
     function buildCaptchaQuestion() {
       return `${captchaState.a} + ${captchaState.b}`;
     }
@@ -6832,62 +6860,80 @@
 
     function setAuthMode(mode) {
       authMode = mode;
+      authFlow = mode;
       document.getElementById("loginTab").classList.toggle("active", mode === "login");
       document.getElementById("registerTab").classList.toggle("active", mode === "register");
       document.getElementById("authSubmit").textContent = mode === "login" ? "登录" : "注册";
-      document.getElementById("authHint").textContent = mode === "login" ? "登录必须完成人机验证。请使用手机号和至少6位数字密码登录，支持 017、60 或 +60 输入。" : "注册请使用手机号，密码至少6位数字。可选 WhatsApp 验证，未配置时也能直接注册。";
-      document.getElementById("captchaField").style.display = mode === "login" ? "grid" : "none";
-      document.getElementById("registerCodeField").style.display = mode === "register" ? "grid" : "none";
-      whatsappCodeSent = false;
-      document.getElementById("authCode").value = "";
+      document.getElementById("authHint").textContent = mode === "login" ? "登录请使用手机号和至少6位数字密码。登录时需要完成人机验证。" : "注册请填写手机号、确认手机号、邮箱和密码。邮箱用于找回密码。";
+      document.getElementById("authSecondaryHint").textContent = mode === "login" ? "登录时请完成人机验证。" : "注册不收验证码，邮箱用于找回密码。";
+      document.getElementById("captchaField").style.display = "grid";
+      document.getElementById("confirmPhoneField").style.display = mode === "register" ? "grid" : "none";
+      document.getElementById("emailField").style.display = mode === "register" ? "grid" : "none";
+      document.getElementById("forgotPassBtn").style.display = mode === "login" ? "inline-flex" : "none";
+      document.getElementById("authNameConfirm").value = "";
+      document.getElementById("authEmail").value = "";
       refreshCaptcha();
     }
 
-    async function sendWhatsappCode() {
-      const phone = normalizePhone(document.getElementById("authName").value.trim());
-      if (!isValidPhone(phone)) return showToast("请输入正确手机号");
-      document.getElementById("authName").value = phone;
-      try {
-        await apiFetch("/api/auth/request-whatsapp-code", {
-          method: "POST",
-          body: JSON.stringify({ phone })
-        });
-        whatsappCodeSent = true;
-        document.getElementById("registerCodeHint").textContent = "验证码已发送到 WhatsApp，请查看消息后输入验证码完成注册。";
-        showToast("WhatsApp 验证码已发送");
-      } catch (error) {
-        showToast(error.message || "WhatsApp 验证码发送失败");
-      }
+    function openForgotPassword() {
+      authMode = "login";
+      authFlow = "reset";
+      document.getElementById("loginTab").classList.add("active");
+      document.getElementById("registerTab").classList.remove("active");
+      document.getElementById("authSubmit").textContent = "重设密码";
+      document.getElementById("authHint").textContent = "输入注册时绑定的手机号和邮箱，再设置新密码。";
+      document.getElementById("authSecondaryHint").textContent = "找回密码时同样需要完成人机验证。";
+      document.getElementById("captchaField").style.display = "grid";
+      document.getElementById("confirmPhoneField").style.display = "none";
+      document.getElementById("emailField").style.display = "grid";
+      document.getElementById("forgotPassBtn").style.display = "none";
+      document.getElementById("authEmail").value = "";
+      refreshCaptcha();
     }
 
     async function handleAuth() {
       const name = normalizePhone(document.getElementById("authName").value.trim());
+      const confirmName = normalizePhone(document.getElementById("authNameConfirm").value.trim());
+      const email = normalizeEmail(document.getElementById("authEmail").value.trim());
       const pass = document.getElementById("authPass").value.trim();
       const captchaAnswer = document.getElementById("authCaptcha").value.trim();
       const captchaQuestion = buildCaptchaQuestion();
-      const whatsappCode = document.getElementById("authCode").value.trim();
       if (!name || !pass) return showToast("请输入手机号和密码");
       if (!isValidPhone(name)) return showToast("请输入正确手机号");
       document.getElementById("authName").value = name;
       if (!isValidPassword(pass)) return showToast("密码至少6位数字");
-      if (authMode === "login") {
-        if (!captchaAnswer) return showToast("请完成人机验证");
-        if (String(captchaState.a + captchaState.b) !== captchaAnswer) {
-          refreshCaptcha();
-          return showToast("人机验证错误");
-        }
+      if (!captchaAnswer) return showToast("请完成人机验证");
+      if (String(captchaState.a + captchaState.b) !== captchaAnswer) {
+        refreshCaptcha();
+        return showToast("人机验证错误");
+      }
+      if (authFlow === "register") {
+        if (!confirmName) return showToast("请再次输入手机号");
+        if (name !== confirmName) return showToast("两次输入的手机号不一致");
+        if (!email) return showToast("请输入邮箱");
+        if (!isValidEmail(email)) return showToast("请输入正确邮箱");
+      }
+      if (authFlow === "reset") {
+        if (!email) return showToast("请输入邮箱");
+        if (!isValidEmail(email)) return showToast("请输入正确邮箱");
       }
       if (API_ENABLED) {
-        const endpoint = authMode === "register" ? (whatsappCode ? "/api/auth/register-whatsapp" : "/api/register") : "/api/login";
+        const endpoint = authFlow === "register" ? "/api/register" : authFlow === "reset" ? "/api/password-reset" : "/api/login";
         try {
           const data = await apiFetch(endpoint, {
             method: "POST",
-            body: JSON.stringify({ name, pass, code: whatsappCode, captchaQuestion, captchaAnswer })
+            body: JSON.stringify({ name, email, pass, captchaQuestion, captchaAnswer })
           });
-          localStorage.setItem(SESSION_KEY, data.currentUser || name);
-          state = normalizeState(data.state, data.currentUser || name);
+          localStorage.setItem(SESSION_KEY, data.currentUser || "");
+          state = normalizeState(data.state, data.currentUser || "");
           localStorage.setItem(STORE_KEY, JSON.stringify(state));
           refreshCaptcha();
+          if (authFlow === "reset") {
+            showToast("密码已重设，请直接登录");
+            document.getElementById("authPass").value = "";
+            setAuthMode("login");
+            return;
+          }
           enterMain();
           return;
         } catch (error) {
@@ -6896,12 +6942,24 @@
           apiOnline = false;
         }
       }
-      if (authMode === "register") {
+      if (authFlow === "register") {
         if (state.users[name]) return showToast("这个手机号已经注册");
-        state.users[name] = { name, phone: name, pass, balance: 0, createdAt: now(), verifiedVia: whatsappCode ? "local-whatsapp" : "local-fallback" };
+        state.users[name] = { name, phone: name, email, pass, balance: 0, createdAt: now(), verifiedVia: "local-fallback" };
         state.currentUser = name;
         localStorage.setItem(SESSION_KEY, name);
         addLog(name, "注册账号", 0, 0, "注册");
+      } else if (authFlow === "reset") {
+        if (!state.users[name]) return showToast("找不到这个用户");
+        if (normalizeEmail(state.users[name].email || "") !== email) return showToast("手机号与邮箱不匹配");
+        state.users[name].pass = pass;
+        addLog(name, "邮箱找回密码", 0, 0, "找回密码");
+        state.currentUser = "";
+        localStorage.removeItem(SESSION_KEY);
+        save();
+        refreshCaptcha();
+        showToast("密码已重设，请直接登录");
+        setAuthMode("login");
+        return;
       } else {
         if (!state.users[name] || state.users[name].pass !== pass) {
           refreshCaptcha();
@@ -9987,7 +10045,7 @@
       if (target.id === "registerTab") setAuthMode("register");
       if (target.id === "authSubmit") handleAuth();
       if (target.id === "refreshCaptcha") refreshCaptcha();
-      if (target.id === "sendWhatsappCode") sendWhatsappCode();
+      if (target.id === "forgotPassBtn") openForgotPassword();
       if (target.dataset.page) {
         if (target.dataset.sport) sportFilter = target.dataset.sport;
         nav(target.dataset.page);
